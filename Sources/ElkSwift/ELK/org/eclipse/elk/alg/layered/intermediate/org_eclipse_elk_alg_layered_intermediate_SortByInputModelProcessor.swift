@@ -216,39 +216,30 @@ package class org_eclipse_elk_alg_layered_intermediate_SortByInputModelProcessor
             smallerThan.removeAll()
         }
 
-        private var _cmpDebugCount = 0
         package func compare(
             _ n1: org_eclipse_elk_alg_layered_graph_LNode,
             _ n2: org_eclipse_elk_alg_layered_graph_LNode
         ) -> Int {
-            _cmpDebugCount += 1
-            let _cmpId = _cmpDebugCount
-            func _nlbl(_ n: org_eclipse_elk_alg_layered_graph_LNode) -> String {
-                if let elk = n.getProperty(org_eclipse_elk_alg_layered_options_InternalProperties.ORIGIN) as? ElkNode {
-                    return elk.labels.first?.text ?? elk.identifier ?? "?"
-                }
-                return "[\(n.getType())#\(n.id)]"
-            }
             let n1Id = ObjectIdentifier(n1)
             let n2Id = ObjectIdentifier(n2)
             if biggerThan[n1Id] == nil {
                 biggerThan[n1Id] = []
-            } else if biggerThan[n1Id]!.contains(n2Id) {
+            } else if biggerThan[n1Id, default: Set()].contains(n2Id) {
                 return 1
             }
             if biggerThan[n2Id] == nil {
                 biggerThan[n2Id] = []
-            } else if biggerThan[n2Id]!.contains(n1Id) {
+            } else if biggerThan[n2Id, default: Set()].contains(n1Id) {
                 return -1
             }
             if smallerThan[n1Id] == nil {
                 smallerThan[n1Id] = []
-            } else if smallerThan[n1Id]!.contains(n2Id) {
+            } else if smallerThan[n1Id, default: Set()].contains(n2Id) {
                 return -1
             }
             if smallerThan[n2Id] == nil {
                 smallerThan[n2Id] = []
-            } else if biggerThan[n2Id]!.contains(n1Id) {
+            } else if biggerThan[n2Id, default: Set()].contains(n1Id) {
                 return 1
             }
 
@@ -579,23 +570,24 @@ package class org_eclipse_elk_alg_layered_intermediate_SortByInputModelProcessor
             if smallerThan[biggerID] == nil { smallerThan[biggerID] = [] }
             if smallerThan[smallerID] == nil { smallerThan[smallerID] = [] }
 
-            biggerThan[biggerID]!.insert(smallerID)
-            smallerThan[smallerID]!.insert(biggerID)
+            biggerThan[biggerID, default: Set()].insert(smallerID)
+            smallerThan[smallerID, default: Set()].insert(biggerID)
 
             // Transitive closure: everything smaller than `smaller` is also smaller than `bigger`
-            for verySmallID in biggerThan[smallerID]! {
-                biggerThan[biggerID]!.insert(verySmallID)
-                if smallerThan[verySmallID] == nil { smallerThan[verySmallID] = [] }
-                smallerThan[verySmallID]!.insert(biggerID)
-                smallerThan[verySmallID]!.formUnion(smallerThan[biggerID]!)
+            let smallerNodeBiggerThan = biggerThan[smallerID] ?? []
+            let biggerNodeSmallerThan = smallerThan[biggerID] ?? []
+            for verySmallID in smallerNodeBiggerThan {
+                biggerThan[biggerID, default: Set()].insert(verySmallID)
+                smallerThan[verySmallID, default: Set()].insert(biggerID)
+                smallerThan[verySmallID, default: Set()].formUnion(biggerNodeSmallerThan)
             }
 
             // Transitive closure: everything bigger than `bigger` is also bigger than `smaller`
-            for veryBigID in smallerThan[biggerID]! {
-                smallerThan[smallerID]!.insert(veryBigID)
-                if biggerThan[veryBigID] == nil { biggerThan[veryBigID] = [] }
-                biggerThan[veryBigID]!.insert(smallerID)
-                biggerThan[veryBigID]!.formUnion(biggerThan[smallerID]!)
+            let smallerNodeBiggerThan2 = biggerThan[smallerID] ?? []
+            for veryBigID in biggerNodeSmallerThan {
+                smallerThan[smallerID, default: Set()].insert(veryBigID)
+                biggerThan[veryBigID, default: Set()].insert(smallerID)
+                biggerThan[veryBigID, default: Set()].formUnion(smallerNodeBiggerThan2)
             }
         }
 
@@ -626,22 +618,22 @@ package class org_eclipse_elk_alg_layered_intermediate_SortByInputModelProcessor
             // Check transitive ordering first (Java lines 106-125)
             if biggerThan[p1ID] == nil {
                 biggerThan[p1ID] = []
-            } else if biggerThan[p1ID]!.contains(p2ID) {
+            } else if biggerThan[p1ID, default: Set()].contains(p2ID) {
                 return 1
             }
             if biggerThan[p2ID] == nil {
                 biggerThan[p2ID] = []
-            } else if biggerThan[p2ID]!.contains(p1ID) {
+            } else if biggerThan[p2ID, default: Set()].contains(p1ID) {
                 return -1
             }
             if smallerThan[p1ID] == nil {
                 smallerThan[p1ID] = []
-            } else if smallerThan[p1ID]!.contains(p2ID) {
+            } else if smallerThan[p1ID, default: Set()].contains(p2ID) {
                 return -1
             }
             if smallerThan[p2ID] == nil {
                 smallerThan[p2ID] = []
-            } else if biggerThan[p2ID]!.contains(p1ID) {
+            } else if biggerThan[p2ID, default: Set()].contains(p1ID) {
                 return 1
             }
 

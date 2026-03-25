@@ -48,9 +48,11 @@ package class Tarjan {
 
             let target: LNode
             if edge.getTarget()?.getNode() === v {
-                target = edge.getSource()!.getNode()!
+                guard let t = edge.getSource()?.getNode() else { continue }
+                target = t
             } else {
-                target = edge.getTarget()!.getNode()!
+                guard let t = edge.getTarget()?.getNode() else { continue }
+                target = t
             }
 
             let targetTarjanId: Int = target.getProperty(InternalProperties.TARJAN_ID) as? Int ?? -1

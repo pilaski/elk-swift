@@ -65,7 +65,7 @@ package final class org_eclipse_elk_alg_layered_p3order_NodeRelativePortDistribu
             }
 
         case .UNDEFINED:
-            preconditionFailure("Port type is undefined")
+            break
         }
 
         // Java: consumed rank is always 1 for node-relative strategy.

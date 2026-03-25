@@ -45,14 +45,16 @@ package class BezierSpline {
      * returns the first point of the first piece of the spline.
      */
     package func getStartPoint() -> KVector {
-        return curves.first!.start
+        guard let first = curves.first else { return KVector() }
+        return first.start
     }
     
     /**
      * returns the last point of the last piece of the spline.
      */
     package func getEndPoint() -> KVector {
-        return curves.last!.end
+        guard let last = curves.last else { return KVector() }
+        return last.end
     }
     
     /**
@@ -89,7 +91,8 @@ package class BezierSpline {
         let size = curves.count + 1
         var ret: [KVector] = Array(repeating: KVector(), count: size)
         
-        ret[0] = curves.first!.start
+        guard let firstCurve = curves.first else { return [] }
+        ret[0] = firstCurve.start
         var i = 1
         for curve in curves {
             ret[i] = curve.end
@@ -108,7 +111,8 @@ package class BezierSpline {
         var apprx: [KVector] = Array(repeating: KVector(), count: totalPoints)
         
         // add initial point
-        apprx[0] = curves.first!.start
+        guard let firstCurve = curves.first else { return [] }
+        apprx[0] = firstCurve.start
         
         var i = 1
         // add all further points

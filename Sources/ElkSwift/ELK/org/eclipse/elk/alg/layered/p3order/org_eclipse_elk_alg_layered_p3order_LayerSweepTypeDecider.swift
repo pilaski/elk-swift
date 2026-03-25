@@ -176,7 +176,8 @@ package class org_eclipse_elk_alg_layered_p3order_LayerSweepTypeDecider:
         if nodeInfo[layerIndex][node.id] == nil {
             nodeInfo[layerIndex][node.id] = NodeInfo()
         }
-        return nodeInfo[layerIndex][node.id]!
+        guard let info = nodeInfo[layerIndex][node.id] else { return NodeInfo() }
+        return info
     }
 
     package func initAtLayerLevel(

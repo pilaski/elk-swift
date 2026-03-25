@@ -185,10 +185,12 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
             leftOfRightmostPortId = portCount - 1
         }
 
+        guard let penalties = portPenalties else { return 0 }
+
         if leftmostPortId <= leftOfRightmostPortId {
-            return portPenalties![leftOfRightmostPortId] - portPenalties![leftmostPortId]
+            return penalties[leftOfRightmostPortId] - penalties[leftmostPortId]
         } else {
-            return portPenalties![portCount - 1] - portPenalties![leftmostPortId] + portPenalties![leftOfRightmostPortId]
+            return penalties[portCount - 1] - penalties[leftmostPortId] + penalties[leftOfRightmostPortId]
         }
     }
 
@@ -204,7 +206,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
             } else {
                 penaltySum += Self.CONNECTED_PORT_PENALTY
             }
-            portPenalties![i] = penaltySum
+            portPenalties?[i] = penaltySum
         }
     }
 }

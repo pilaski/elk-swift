@@ -177,9 +177,11 @@ package final class org_eclipse_elk_alg_layered_p2layers_NetworkSimplexLayerer {
 
     private func getOpposite(_ port: LPort, _ edge: LEdge) -> LPort {
         if edge.source === port {
-            return edge.target!
+            guard let target = edge.target else { return port }
+            return target
         } else {
-            return edge.source!
+            guard let source = edge.source else { return port }
+            return source
         }
     }
 }

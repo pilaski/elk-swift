@@ -58,7 +58,7 @@ package final class PortPlacementCalculator {
             return
         }
 
-        let insidePortLabelCell = nodeContext.insidePortLabelCells[portSide]!
+        guard let insidePortLabelCell = nodeContext.insidePortLabelCells[portSide] else { return }
         let insidePortLabelCellRectangle = insidePortLabelCell.getCellRectangle()
         let insidePortLabelCellPadding = insidePortLabelCell.getPadding()
 
@@ -186,7 +186,7 @@ package final class PortPlacementCalculator {
             return
         }
 
-        let insidePortLabelCell = nodeContext.insidePortLabelCells[portSide]!
+        guard let insidePortLabelCell = nodeContext.insidePortLabelCells[portSide] else { return }
         let insidePortLabelCellRectangle = insidePortLabelCell.getCellRectangle()
         let insidePortLabelCellPadding = insidePortLabelCell.getPadding()
 

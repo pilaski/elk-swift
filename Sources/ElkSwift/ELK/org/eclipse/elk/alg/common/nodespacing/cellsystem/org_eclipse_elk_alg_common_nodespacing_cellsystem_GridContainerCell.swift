@@ -192,7 +192,8 @@ package class GridContainerCell: ContainerCell {
                 maxMinWidth = max(maxMinWidth, ContainerCell.minWidthOfCell(cells[rowIndex][column.ordinal], respectContributionFlag: respectContributionFlag))
             }
         } else {
-            maxMinWidth = ContainerCell.minWidthOfCell(cells[row!.ordinal][column.ordinal], respectContributionFlag: respectContributionFlag)
+            guard let row = row else { return maxMinWidth }
+            maxMinWidth = ContainerCell.minWidthOfCell(cells[row.ordinal][column.ordinal], respectContributionFlag: respectContributionFlag)
         }
 
         if column == .center, let size = centerCellMinimumSize {

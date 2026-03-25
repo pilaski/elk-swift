@@ -84,8 +84,9 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummyInserter 
         dummyNode.setProperty(InternalProperties.ORIGIN, value: edge)
         dummyNode.setProperty(InternalProperties.REPRESENTED_LABELS, value: representedLabels)
         dummyNode.setProperty(LayeredOptions.PORT_CONSTRAINTS, value: PortConstraints.FIXED_POS)
-        dummyNode.setProperty(InternalProperties.LONG_EDGE_SOURCE, value: edge.source!)
-        dummyNode.setProperty(InternalProperties.LONG_EDGE_TARGET, value: edge.target!)
+        guard let src = edge.source, let tgt = edge.target else { return dummyNode }
+        dummyNode.setProperty(InternalProperties.LONG_EDGE_SOURCE, value: src)
+        dummyNode.setProperty(InternalProperties.LONG_EDGE_TARGET, value: tgt)
 
         LongEdgeSplitter.splitEdge(edge, dummyNode)
 

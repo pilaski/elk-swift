@@ -294,8 +294,9 @@ package class ElkGraphLayoutTransferrer {
         for lnode in nodes {
             var elkNode: ElkNode?
             if representsNode(lnode) {
-                elkNode = ElkGraphUtil.createNode(parentElkNode)
-                applyNodeLayout(lnode, elknode: elkNode!, offset: offset)
+                let createdNode = ElkGraphUtil.createNode(parentElkNode)
+                elkNode = createdNode
+                applyNodeLayout(lnode, elknode: createdNode, offset: offset)
             } else if representsExternalPort(lnode) && parentLNode == nil {
                 if let elkport = lnode.getProperty(InternalProperties.ORIGIN) as? ElkPort {
                     let portPosition = LGraphUtil.getExternalPortPosition(lgraph, lnode, elkport.width, elkport.height)

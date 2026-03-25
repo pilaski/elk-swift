@@ -103,7 +103,8 @@ package enum org_eclipse_elk_alg_layered_intermediate_IntermediateProcessorStrat
         case .END_NODE_PORT_LABEL_MANAGEMENT_PROCESSOR:
             return org_eclipse_elk_alg_layered_intermediate_LabelManagementProcessor(false)
         case .FINAL_SPLINE_BENDPOINTS_CALCULATOR:
-            fatalError("Spline routing is not supported (mermaid hard-codes ORTHOGONAL)")
+            assertionFailure("Spline routing is not supported")
+            return _NoOpProcessor()
         case .HIERARCHICAL_NODE_RESIZER:
             return org_eclipse_elk_alg_layered_intermediate_HierarchicalNodeResizingProcessor()
         case .HIERARCHICAL_PORT_CONSTRAINT_PROCESSOR:
@@ -192,6 +193,11 @@ package enum org_eclipse_elk_alg_layered_intermediate_IntermediateProcessorStrat
             return org_eclipse_elk_alg_layered_p3order_LayerSweepCrossingMinimizer(.TWO_SIDED_GREEDY_SWITCH)
         }
     }
+}
+
+private struct _NoOpProcessor: ILayoutProcessor {
+    typealias G = LGraph
+    func process(_ graph: LGraph, _ progressMonitor: IElkProgressMonitor) {}
 }
 
 package enum org_eclipse_elk_alg_layered_intermediate_GraphTransformer_Mode {

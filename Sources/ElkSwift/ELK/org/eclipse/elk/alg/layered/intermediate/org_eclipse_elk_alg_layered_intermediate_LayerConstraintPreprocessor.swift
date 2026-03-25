@@ -64,7 +64,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_LayerConstraintPrep
 
     private func hideEdge(_ lNode: LNode, _ lEdge: LEdge) {
         let isOutgoing = lEdge.source?.node === lNode
-        let oppositePort: LPort = isOutgoing ? lEdge.target! : lEdge.source!
+        guard let oppositePort = isOutgoing ? lEdge.target : lEdge.source else { return }
 
         if isOutgoing {
             lEdge.setTarget(nil)

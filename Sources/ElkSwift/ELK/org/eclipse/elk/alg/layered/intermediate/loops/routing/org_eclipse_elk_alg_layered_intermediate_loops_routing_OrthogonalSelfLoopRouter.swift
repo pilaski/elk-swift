@@ -62,7 +62,7 @@ package class org_eclipse_elk_alg_layered_intermediate_loops_routing_OrthogonalS
         } else if sourcePortSide.left() == targetPortSide {
             return .COUNTER_CLOCKWISE
         } else {
-            let slLoop = slEdge.getSLHyperLoop()!
+            guard let slLoop = slEdge.getSLHyperLoop() else { return .CLOCKWISE }
             if slLoop.getOccupiedPortSides().contains(sourcePortSide.right()) {
                 return .CLOCKWISE
             } else {
@@ -201,7 +201,7 @@ package class org_eclipse_elk_alg_layered_intermediate_loops_routing_OrthogonalS
 
     private func addOuterBendPoint(_ slEdge: SelfLoopEdge, _ slPort: SelfLoopPort,
                                      _ routingSlotPositions: [[Double]], _ bendPoints: KVectorChain) {
-        let slLoop = slEdge.getSLHyperLoop()!
+        guard let slLoop = slEdge.getSLHyperLoop() else { return }
         let lPort = slPort.getLPort()
         let portSide = lPort.getSide()
 
@@ -227,7 +227,7 @@ package class org_eclipse_elk_alg_layered_intermediate_loops_routing_OrthogonalS
 
         if lSourcePort.getSide() == lTargetPort.getSide() { return }
 
-        let slLoop = slEdge.getSLHyperLoop()!
+        guard let slLoop = slEdge.getSLHyperLoop() else { return }
         var labelSide: PortSide?
         var lSize: KVector?
         let inline = slEdge.isInline()

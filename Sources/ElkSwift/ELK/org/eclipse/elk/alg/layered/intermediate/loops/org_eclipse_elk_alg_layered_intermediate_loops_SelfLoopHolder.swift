@@ -42,7 +42,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_SelfLoopHolde
 
         for lEdge in lNode.getOutgoingEdges() {
             if lEdge.isSelfLoop() {
-                slEdges.append(SelfLoopEdge(lEdge, selfLoopPortFor(lEdge.getSource()!), selfLoopPortFor(lEdge.getTarget()!)))
+                guard let edgeSource = lEdge.getSource(), let edgeTarget = lEdge.getTarget() else { continue }
+                slEdges.append(SelfLoopEdge(lEdge, selfLoopPortFor(edgeSource), selfLoopPortFor(edgeTarget)))
             }
         }
 

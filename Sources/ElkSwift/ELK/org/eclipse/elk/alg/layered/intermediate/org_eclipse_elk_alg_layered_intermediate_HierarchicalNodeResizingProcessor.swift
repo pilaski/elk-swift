@@ -18,8 +18,8 @@ package class org_eclipse_elk_alg_layered_intermediate_HierarchicalNodeResizingP
 
         resizeGraph(graph)
 
-        if isNested(graph) {
-            graphLayoutToNode(graph.getParentNode()!, graph)
+        if isNested(graph), let parentNode = graph.getParentNode() {
+            graphLayoutToNode(parentNode, graph)
         }
 
         progressMonitor.done()

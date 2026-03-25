@@ -113,7 +113,8 @@ package final class RectangleStripOverlapRemover {
         rectangleNodes.sort { RectangleStripOverlapRemover.compareLeftRectangleBorders($0, $1) }
 
         computeOverlaps()
-        let stripSize = overlapRemovalStrategy!.removeOverlaps(self)
+        guard let strategy = overlapRemovalStrategy else { return 0 }
+        let stripSize = strategy.removeOverlaps(self)
 
         rectangleNodes.forEach { node in
             exportRectangle(node, stripSize: stripSize)

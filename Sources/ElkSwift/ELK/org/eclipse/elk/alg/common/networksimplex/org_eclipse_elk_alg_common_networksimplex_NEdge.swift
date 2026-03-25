@@ -55,15 +55,15 @@ package class NEdge: Hashable {
     /**
      * @return the source
      */
-    package func getSource() -> NNode {
-        return source!
+    package func getSource() -> NNode? {
+        return source
     }
 
     /**
      * @return the target
      */
-    package func getTarget() -> NNode {
-        return target!
+    package func getTarget() -> NNode? {
+        return target
     }
     
     /**

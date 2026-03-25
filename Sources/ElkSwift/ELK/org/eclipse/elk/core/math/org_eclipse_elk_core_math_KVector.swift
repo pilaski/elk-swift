@@ -343,7 +343,7 @@ package final class KVector: Hashable, CustomStringConvertible, CustomDebugStrin
      */
     package func toRadians() -> Double {
         let length = self.length()
-        precondition(length > 0, "Vector length must not be zero")
+        guard length > 0 else { return 0 }
         
         if x >= 0 && y >= 0 {  // 1st quadrant
             return asin(y / length)

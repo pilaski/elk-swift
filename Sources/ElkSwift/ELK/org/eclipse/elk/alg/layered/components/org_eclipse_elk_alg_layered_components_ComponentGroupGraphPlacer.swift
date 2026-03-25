@@ -207,7 +207,8 @@ package class ComponentGroupGraphPlacer: AbstractGraphPlacer {
             totalArea += componentSize.x * componentSize.y
         }
 
-        let aspectRatio: Double = components.first!.getProperty(LayeredOptions.ASPECT_RATIO) ?? 1.0
+        guard let firstComponent = components.first else { return KVector() }
+        let aspectRatio: Double = firstComponent.getProperty(LayeredOptions.ASPECT_RATIO) ?? 1.0
         maxRowWidth = max(maxRowWidth, sqrt(totalArea) * aspectRatio)
 
         var xpos: Double = 0, ypos: Double = 0, highestBox: Double = 0, broadestRow: Double = spacing

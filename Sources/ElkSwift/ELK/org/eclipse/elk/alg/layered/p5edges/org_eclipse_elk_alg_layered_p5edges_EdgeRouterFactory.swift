@@ -22,7 +22,8 @@ package enum org_eclipse_elk_alg_layered_p5edges_EdgeRouterFactory: org_eclipse_
         case .ORTHOGONAL:
             return org_eclipse_elk_alg_layered_p5edges_OrthogonalEdgeRouter()
         case .SPLINES:
-            fatalError("Spline routing is not supported (mermaid hard-codes ORTHOGONAL)")
+            assertionFailure("Spline routing is not supported")
+            return org_eclipse_elk_alg_layered_p5edges_OrthogonalEdgeRouter()
         }
     }
 

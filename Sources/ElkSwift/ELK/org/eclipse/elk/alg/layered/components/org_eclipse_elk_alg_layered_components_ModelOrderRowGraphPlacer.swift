@@ -24,9 +24,12 @@ package class ModelOrderRowGraphPlacer: SimpleRowGraphPlacer {
             let size = graph.size
             let extPortConnections: Set<PortSide> = graph.getProperty(InternalProperties.EXT_PORT_CONNECTIONS) ?? []
 
-            if ((xpos + size.x > maxRowWidth && !extPortConnections.contains(.NORTH))
-                || (lastComponent != nil && ((lastComponent!.getProperty(InternalProperties.EXT_PORT_CONNECTIONS) as? Set<PortSide> ?? []).contains(.EAST)))
-                || extPortConnections.contains(.WEST)) {
+            let lastHasEast = lastComponent.map {
+                ($0.getProperty(InternalProperties.EXT_PORT_CONNECTIONS) as? Set<PortSide> ?? []).contains(.EAST)
+            } ?? false
+            if (xpos + size.x > maxRowWidth && !extPortConnections.contains(.NORTH))
+                || lastHasEast
+                || extPortConnections.contains(.WEST) {
                 // Components with NORTH connection are allowed to violate the width constraint.
                 // Place the graph into the next row
                 // Previous EAST ports require a new row.

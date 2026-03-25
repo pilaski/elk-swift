@@ -57,7 +57,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_SelfHyperLoop
                 if slLabels == nil {
                     slLabels = SelfHyperLoopLabels(self)
                 }
-                slLabels!.addLLabels(lLabels)
+                slLabels?.addLLabels(lLabels)
             }
         }
     }
@@ -92,7 +92,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_SelfHyperLoop
     }
 
     package func hasSLPortsOnSide(_ portSide: PortSide) -> Bool {
-        return slPortsBySide?[portSide] != nil && !slPortsBySide![portSide]!.isEmpty
+        guard let ports = slPortsBySide?[portSide] else { return false }
+        return !ports.isEmpty
     }
 
     package func getLeftmostPort() -> SelfLoopPort? {

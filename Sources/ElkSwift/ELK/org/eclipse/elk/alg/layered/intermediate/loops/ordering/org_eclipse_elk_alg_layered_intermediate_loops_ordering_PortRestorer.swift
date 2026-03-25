@@ -33,7 +33,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_ordering_Port
         // Un-hide all ports
         for side in allSides {
             for area in PortSideArea.allCases {
-                for slPort in targetAreas[side]![area]! {
+                for slPort in targetAreas[side]?[area] ?? [] {
                     slPort.setHidden(false)
                 }
             }
@@ -50,7 +50,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_ordering_Port
         for side in allSides {
             targetAreas[side] = [:]
             for area in PortSideArea.allCases {
-                targetAreas[side]![area] = []
+                targetAreas[side]?[area] = []
             }
         }
     }
@@ -186,9 +186,9 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_ordering_Port
         hiddenPorts.reverse()
 
         if addMode == .PREPEND {
-            targetAreas[portSide]![area]!.insert(contentsOf: hiddenPorts, at: 0)
+            targetAreas[portSide]?[area]?.insert(contentsOf: hiddenPorts, at: 0)
         } else {
-            targetAreas[portSide]![area]!.append(contentsOf: hiddenPorts)
+            targetAreas[portSide]?[area]?.append(contentsOf: hiddenPorts)
         }
     }
 
@@ -203,39 +203,39 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_ordering_Port
         // Clear and rebuild port list
         lNode.ports.removeAll()
 
-        addAll(targetAreas[.NORTH]![.START]!, lNode)
+        addAll(targetAreas[.NORTH]?[.START] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .NORTH && self.isNorthSouthPortWithWestOrWestEastConnections($0) },
             lNode)
-        addAll(targetAreas[.NORTH]![.MIDDLE]!, lNode)
+        addAll(targetAreas[.NORTH]?[.MIDDLE] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .NORTH },
             lNode)
-        addAll(targetAreas[.NORTH]![.END]!, lNode)
+        addAll(targetAreas[.NORTH]?[.END] ?? [], lNode)
 
-        addAll(targetAreas[.EAST]![.START]!, lNode)
-        addAll(targetAreas[.EAST]![.MIDDLE]!, lNode)
+        addAll(targetAreas[.EAST]?[.START] ?? [], lNode)
+        addAll(targetAreas[.EAST]?[.MIDDLE] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .EAST },
             lNode)
-        addAll(targetAreas[.EAST]![.END]!, lNode)
+        addAll(targetAreas[.EAST]?[.END] ?? [], lNode)
 
-        addAll(targetAreas[.SOUTH]![.START]!, lNode)
+        addAll(targetAreas[.SOUTH]?[.START] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .SOUTH && self.isNorthSouthPortWithEastConnections($0) },
             lNode)
-        addAll(targetAreas[.SOUTH]![.MIDDLE]!, lNode)
+        addAll(targetAreas[.SOUTH]?[.MIDDLE] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .SOUTH },
             lNode)
-        addAll(targetAreas[.SOUTH]![.END]!, lNode)
+        addAll(targetAreas[.SOUTH]?[.END] ?? [], lNode)
 
-        addAll(targetAreas[.WEST]![.START]!, lNode)
+        addAll(targetAreas[.WEST]?[.START] ?? [], lNode)
         nextOldPortIndex = addAllThat(oldPortList, nextOldPortIndex,
             { $0.getSide() == .WEST },
             lNode)
-        addAll(targetAreas[.WEST]![.MIDDLE]!, lNode)
-        addAll(targetAreas[.WEST]![.END]!, lNode)
+        addAll(targetAreas[.WEST]?[.MIDDLE] ?? [], lNode)
+        addAll(targetAreas[.WEST]?[.END] ?? [], lNode)
 
         _ = nextOldPortIndex // suppress unused warning
     }

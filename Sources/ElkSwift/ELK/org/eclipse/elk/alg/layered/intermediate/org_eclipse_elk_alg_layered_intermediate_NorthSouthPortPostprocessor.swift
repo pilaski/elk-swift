@@ -67,9 +67,10 @@ package final class org_eclipse_elk_alg_layered_intermediate_NorthSouthPortPostp
 
     private func processInputPort(_ inputPort: LPort, _ addJunctionPoints: Bool) {
         guard let originPort = inputPort.getProperty(InternalProperties.ORIGIN) as? LPort else { return }
+        guard let node = inputPort.getNode() else { return }
 
         let x = originPort.getAbsoluteAnchor().x
-        let y = inputPort.getNode()!.getPosition().y
+        let y = node.getPosition().y
 
         let edgeArray = LGraphUtil.toEdgeArray(inputPort.getIncomingEdges())
         for inEdge in edgeArray {
@@ -77,21 +78,24 @@ package final class org_eclipse_elk_alg_layered_intermediate_NorthSouthPortPostp
             inEdge.getBendPoints().addLast(x, y)
 
             if addJunctionPoints {
-                var junctionPoints = inEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain
-                if junctionPoints == nil {
-                    junctionPoints = KVectorChain()
-                    inEdge.setProperty(LayeredOptions.JUNCTION_POINTS, junctionPoints!)
+                let jp: KVectorChain
+                if let existing = inEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain {
+                    jp = existing
+                } else {
+                    jp = KVectorChain()
+                    inEdge.setProperty(LayeredOptions.JUNCTION_POINTS, jp)
                 }
-                junctionPoints!.add(KVector(x, y))
+                jp.add(KVector(x, y))
             }
         }
     }
 
     private func processOutputPort(_ outputPort: LPort, _ addJunctionPoints: Bool) {
         guard let originPort = outputPort.getProperty(InternalProperties.ORIGIN) as? LPort else { return }
+        guard let node = outputPort.getNode() else { return }
 
         let x = originPort.getAbsoluteAnchor().x
-        let y = outputPort.getNode()!.getPosition().y
+        let y = node.getPosition().y
 
         let edgeArray = LGraphUtil.toEdgeArray(outputPort.getOutgoingEdges())
         for outEdge in edgeArray {
@@ -99,12 +103,14 @@ package final class org_eclipse_elk_alg_layered_intermediate_NorthSouthPortPostp
             outEdge.getBendPoints().addFirst(x, y)
 
             if addJunctionPoints {
-                var junctionPoints = outEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain
-                if junctionPoints == nil {
-                    junctionPoints = KVectorChain()
-                    outEdge.setProperty(LayeredOptions.JUNCTION_POINTS, junctionPoints!)
+                let jp: KVectorChain
+                if let existing = outEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain {
+                    jp = existing
+                } else {
+                    jp = KVectorChain()
+                    outEdge.setProperty(LayeredOptions.JUNCTION_POINTS, jp)
                 }
-                junctionPoints!.add(KVector(x, y))
+                jp.add(KVector(x, y))
             }
         }
     }
@@ -119,18 +125,22 @@ package final class org_eclipse_elk_alg_layered_intermediate_NorthSouthPortPostp
         selfLoop.setSource(originOutputPort)
         selfLoop.setTarget(originInputPort)
 
-        let bendPoint1 = KVector(outputPort.getNode()!.getPosition())
+        guard let outputNode = outputPort.getNode() else { return }
+        guard let inputNode = inputPort.getNode() else { return }
+
+        let bendPoint1 = KVector(outputNode.getPosition())
         bendPoint1.x = originOutputPort.getAbsoluteAnchor().x
         selfLoop.getBendPoints().add(bendPoint1)
 
-        let bendPoint2 = KVector(inputPort.getNode()!.getPosition())
+        let bendPoint2 = KVector(inputNode.getPosition())
         bendPoint2.x = originInputPort.getAbsoluteAnchor().x
         selfLoop.getBendPoints().add(bendPoint2)
     }
 
     private func processSplineInputPort(_ inputPort: LPort) {
         guard let originPort = inputPort.getProperty(InternalProperties.ORIGIN) as? LPort else { return }
-        originPort.setProperty(InternalProperties.SPLINE_NS_PORT_Y_COORD, inputPort.getNode()!.getPosition().y)
+        guard let inputNode = inputPort.getNode() else { return }
+        originPort.setProperty(InternalProperties.SPLINE_NS_PORT_Y_COORD, inputNode.getPosition().y)
 
         let edgeArray = LGraphUtil.toEdgeArray(inputPort.getIncomingEdges())
         for inEdge in edgeArray {
@@ -140,7 +150,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_NorthSouthPortPostp
 
     private func processSplineOutputPort(_ outputPort: LPort) {
         guard let originPort = outputPort.getProperty(InternalProperties.ORIGIN) as? LPort else { return }
-        originPort.setProperty(InternalProperties.SPLINE_NS_PORT_Y_COORD, outputPort.getNode()!.getPosition().y)
+        guard let outputNode = outputPort.getNode() else { return }
+        originPort.setProperty(InternalProperties.SPLINE_NS_PORT_Y_COORD, outputNode.getPosition().y)
 
         let edgeArray = LGraphUtil.toEdgeArray(outputPort.getOutgoingEdges())
         for outEdge in edgeArray {

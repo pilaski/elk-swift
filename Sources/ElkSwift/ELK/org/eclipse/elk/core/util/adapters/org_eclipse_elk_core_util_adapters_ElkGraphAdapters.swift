@@ -30,7 +30,11 @@ extension GraphElementAdapter {
         if let def = prop.defaultValue as? P {
             return def
         }
-        return try! _defaultValue(for: P.self)
+        do {
+            return try _defaultValue(for: P.self)
+        } catch {
+            fatalError("No default value for property type \(P.self): \(error)")
+        }
     }
 
     /// Convenience computed property delegating to getSize()/setSize(_:).

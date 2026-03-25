@@ -19,8 +19,8 @@ package class MapPropertyHolder: IPropertyHolder {
     @discardableResult
     package func setProperty(_ property: IProperty, _ value: Any?) -> Self {
         if let value = value {
-            if propertyMap == nil { propertyMap = [:] }
-            propertyMap![property.id] = value
+            propertyMap = propertyMap ?? [:]
+            propertyMap?[property.id] = value
         } else {
             propertyMap?.removeValue(forKey: property.id)
         }
@@ -42,11 +42,8 @@ package class MapPropertyHolder: IPropertyHolder {
     package func copyProperties(_ other: IPropertyHolder) -> Self {
         let otherMap = other.getAllProperties()
         if !otherMap.isEmpty {
-            if propertyMap == nil {
-                propertyMap = otherMap
-            } else {
-                propertyMap!.merge(otherMap) { _, new in new }
-            }
+            propertyMap = propertyMap ?? [:]
+            propertyMap?.merge(otherMap) { _, new in new }
         }
         return self
     }
@@ -60,8 +57,8 @@ package class MapPropertyHolder: IPropertyHolder {
     @discardableResult
     package func setProperty(_ key: String, _ value: Any?) -> Self {
         if let value = value {
-            if propertyMap == nil { propertyMap = [:] }
-            propertyMap![key] = value
+            propertyMap = propertyMap ?? [:]
+            propertyMap?[key] = value
         } else {
             propertyMap?.removeValue(forKey: key)
         }

@@ -28,7 +28,7 @@ package final class ComponentsProcessor {
 
         // Whether separate components processing is requested
         let separateProperty: Bool? = graph.getProperty(LayeredOptions.SEPARATE_CONNECTED_COMPONENTS)
-        let separate = separateProperty == nil || separateProperty!
+        let separate = separateProperty ?? true
 
         // Whether the graph contains external ports
         let graphProperties: Set<GraphProperties> = graph.getProperty(InternalProperties.GRAPH_PROPERTIES) ?? []

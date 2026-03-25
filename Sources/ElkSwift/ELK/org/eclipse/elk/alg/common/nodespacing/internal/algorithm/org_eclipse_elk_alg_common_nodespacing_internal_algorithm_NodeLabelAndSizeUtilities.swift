@@ -169,7 +169,7 @@ package final class NodeLabelAndSizeUtilities {
             return false
         }
 
-        let firstPort = portContexts.first!
+        guard let firstPort = portContexts.first else { return false }
 
         let alwaysSameSide = nodeContext.portLabelsPlacement.contains(.alwaysSameSide)
         let spaceEfficient = nodeContext.portLabelsPlacement.contains(.spaceEfficient)

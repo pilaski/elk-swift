@@ -69,27 +69,15 @@ package struct ContentAlignment: OptionSet, Hashable {
 // MARK: - CustomStringConvertible
 extension ContentAlignment: CustomStringConvertible {
     package var description: String {
-        let verticalStrings = [
-            ContentAlignment.vTop: "V_TOP",
-            ContentAlignment.vCenter: "V_CENTER",
-            ContentAlignment.vBottom: "V_BOTTOM"
-        ]
-        
-        let horizontalStrings = [
-            ContentAlignment.hLeft: "H_LEFT",
-            ContentAlignment.hCenter: "H_CENTER",
-            ContentAlignment.hRight: "H_RIGHT"
-        ]
-        
         var parts: [String] = []
         
-        if contains(.vTop) { parts.append(verticalStrings[.vTop]!) }
-        if contains(.vCenter) { parts.append(verticalStrings[.vCenter]!) }
-        if contains(.vBottom) { parts.append(verticalStrings[.vBottom]!) }
-        
-        if contains(.hLeft) { parts.append(horizontalStrings[.hLeft]!) }
-        if contains(.hCenter) { parts.append(horizontalStrings[.hCenter]!) }
-        if contains(.hRight) { parts.append(horizontalStrings[.hRight]!) }
+        if contains(.vTop) { parts.append("V_TOP") }
+        if contains(.vCenter) { parts.append("V_CENTER") }
+        if contains(.vBottom) { parts.append("V_BOTTOM") }
+
+        if contains(.hLeft) { parts.append("H_LEFT") }
+        if contains(.hCenter) { parts.append("H_CENTER") }
+        if contains(.hRight) { parts.append("H_RIGHT") }
         
         return parts.isEmpty ? "[]" : "{\(parts.joined(separator: ", "))}"
     }

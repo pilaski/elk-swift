@@ -10,8 +10,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
 
         for slLoop in slHolder.getSLHyperLoops() {
             if slLoop.getSLLabels() != nil {
-                if labelManager != nil {
-                    manageLabels(slLoop, labelManager!)
+                if let manager = labelManager {
+                    manageLabels(slLoop, manager)
                 }
                 computeCoordinates(slLoop)
             }
@@ -38,7 +38,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
 
             switch loopType {
             case .ONE_SIDE:
-                let loopSide = slLoop.getOccupiedPortSides().first!
+                guard let loopSide = slLoop.getOccupiedPortSides().first else { continue }
 
                 if orderingStrategy == .SEQUENCED && loopSide == .NORTH {
                     northernOneSidedSLLoops?.append(slLoop)
@@ -68,15 +68,18 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     }
 
     private func assignOneSidedSimpleSideAndAlignment(_ slLoop: SelfHyperLoop, _ loopSide: PortSide) {
-        for label in slLoop.getSLLabels()!.getLLabels() {
-            _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+        if let slLabels = slLoop.getSLLabels() {
+            for label in slLabels.getLLabels() {
+                _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+            }
         }
 
         switch loopSide {
         case .EAST, .WEST:
-            var topmostPort = slLoop.getLeftmostPort()!
-            if slLoop.getRightmostPort()!.getLPort().getPosition().y < topmostPort.getLPort().getPosition().y {
-                topmostPort = slLoop.getRightmostPort()!
+            guard var topmostPort = slLoop.getLeftmostPort() else { break }
+            if let rightmost = slLoop.getRightmostPort(),
+               rightmost.getLPort().getPosition().y < topmostPort.getLPort().getPosition().y {
+                topmostPort = rightmost
             }
             assignSideAndAlignmentHelper(slLoop, loopSide, .TOP, topmostPort)
 
@@ -99,9 +102,9 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
         }
 
         if portSide == .NORTH {
-            slLoops.sort { $0.getLeftmostPort()!.getLPort().id < $1.getLeftmostPort()!.getLPort().id }
+            slLoops.sort { ($0.getLeftmostPort()?.getLPort().id ?? 0) < ($1.getLeftmostPort()?.getLPort().id ?? 0) }
         } else {
-            slLoops.sort { $0.getLeftmostPort()!.getLPort().id > $1.getLeftmostPort()!.getLPort().id }
+            slLoops.sort { ($0.getLeftmostPort()?.getLPort().id ?? 0) > ($1.getLeftmostPort()?.getLPort().id ?? 0) }
         }
 
         var leftIdx = 0
@@ -111,8 +114,12 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
             let leftSlLoop = slLoops[leftIdx]
             let rightSlLoop = slLoops[rightIdx]
 
-            let leftLoopAlignmentRef = portSide == .NORTH ? leftSlLoop.getRightmostPort()! : leftSlLoop.getLeftmostPort()!
-            let rightLoopAlignmentRef = portSide == .NORTH ? rightSlLoop.getLeftmostPort()! : rightSlLoop.getRightmostPort()!
+            guard let leftLoopAlignmentRef = portSide == .NORTH ? leftSlLoop.getRightmostPort() : leftSlLoop.getLeftmostPort(),
+                  let rightLoopAlignmentRef = portSide == .NORTH ? rightSlLoop.getLeftmostPort() : rightSlLoop.getRightmostPort() else {
+                leftIdx += 1
+                rightIdx -= 1
+                continue
+            }
 
             assignSideAndAlignmentHelper(leftSlLoop, portSide, .RIGHT, leftLoopAlignmentRef)
             assignSideAndAlignmentHelper(rightSlLoop, portSide, .LEFT, rightLoopAlignmentRef)
@@ -127,11 +134,15 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     }
 
     private func assignTwoSidesCornerSideAndAlignment(_ slLoop: SelfHyperLoop) {
-        let leftmostPortSide = slLoop.getLeftmostPort()!.getLPort().getSide()
-        let rightmostPortSide = slLoop.getRightmostPort()!.getLPort().getSide()
+        guard let leftmostPort = slLoop.getLeftmostPort(),
+              let rightmostPort = slLoop.getRightmostPort() else { return }
+        let leftmostPortSide = leftmostPort.getLPort().getSide()
+        let rightmostPortSide = rightmostPort.getLPort().getSide()
 
-        for label in slLoop.getSLLabels()!.getLLabels() {
-            _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+        if let slLabels = slLoop.getSLLabels() {
+            for label in slLabels.getLLabels() {
+                _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+            }
         }
 
         if leftmostPortSide == .NORTH {
@@ -148,7 +159,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     private func assignTwoSidesOpposingAndThreeSidesSideAndAlignment(_ slLoop: SelfHyperLoop) {
         let occupiedSides = slLoop.getOccupiedPortSides()
         var hasInlineLabels = false
-        for label in slLoop.getSLLabels()!.getLLabels() {
+        guard let slLabelsForInline = slLoop.getSLLabels() else { return }
+        for label in slLabelsForInline.getLLabels() {
             if let inline: Bool = label.getProperty(LayeredOptions.EDGE_LABELS_INLINE) as? Bool, inline {
                 hasInlineLabels = true
                 break
@@ -173,11 +185,14 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     }
 
     private func assignFourSidesSideAndAlignment(_ slLoop: SelfHyperLoop) {
-        let leftmostPortSide = slLoop.getLeftmostPort()!.getLPort().getSide()
-        let rightmostPortSide = slLoop.getLeftmostPort()!.getLPort().getSide() // Note: Java uses getLeftmostPort() for both
+        guard let leftmostPort = slLoop.getLeftmostPort() else { return }
+        let leftmostPortSide = leftmostPort.getLPort().getSide()
+        let rightmostPortSide = leftmostPort.getLPort().getSide() // Note: Java uses getLeftmostPort() for both
 
-        for label in slLoop.getSLLabels()!.getLLabels() {
-            _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+        if let slLabels = slLoop.getSLLabels() {
+            for label in slLabels.getLLabels() {
+                _ = label.setProperty(LayeredOptions.EDGE_LABELS_INLINE, nil)
+            }
         }
 
         if leftmostPortSide == .NORTH || rightmostPortSide == .NORTH {
@@ -190,7 +205,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     private func assignSideAndAlignmentHelper(_ slLoop: SelfHyperLoop, _ side: PortSide,
                                                 _ alignment: SelfHyperLoopLabels.Alignment,
                                                 _ alignmentReference: SelfLoopPort?) {
-        let slLabels = slLoop.getSLLabels()!
+        guard let slLabels = slLoop.getSLLabels() else { return }
         slLabels.setSide(side)
         slLabels.setAlignment(alignment)
         slLabels.setAlignmentReferenceSLPort(alignmentReference)
@@ -199,7 +214,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     // MARK: - Label Management
 
     private func manageLabels(_ slLoop: SelfHyperLoop, _ labelManager: ILabelManager) {
-        let slLabels = slLoop.getSLLabels()!
+        guard let slLabels = slLoop.getSLLabels() else { return }
         let alignRef = slLabels.getAlignmentReferenceSLPort()
 
         let lNode = slLoop.getSLHolder().getLNode()
@@ -212,11 +227,15 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
         case .CENTER:
             targetWidth = lNodeMargins.left + lNodeSize.x + lNodeMargins.right
         case .LEFT:
-            targetWidth = lNodeSize.x
-                - alignRef!.getLPort().getPosition().x - alignRef!.getLPort().getAnchor().x
-                + lNodeMargins.right
+            if let ref = alignRef {
+                targetWidth = lNodeSize.x
+                    - ref.getLPort().getPosition().x - ref.getLPort().getAnchor().x
+                    + lNodeMargins.right
+            }
         case .RIGHT:
-            targetWidth = lNodeMargins.left + alignRef!.getLPort().getPosition().x + alignRef!.getLPort().getAnchor().x
+            if let ref = alignRef {
+                targetWidth = lNodeMargins.left + ref.getLPort().getPosition().x + ref.getLPort().getAnchor().x
+            }
         case .TOP:
             targetWidth = org_eclipse_elk_alg_layered_intermediate_LabelManagementProcessor.MIN_WIDTH_EDGE_LABELS
         }
@@ -229,7 +248,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
     // MARK: - Coordinate Computation
 
     private func computeCoordinates(_ slLoop: SelfHyperLoop) {
-        let slLabels = slLoop.getSLLabels()!
+        guard let slLabels = slLoop.getSLLabels() else { return }
         let alignRef = slLabels.getAlignmentReferenceSLPort()
         let size = slLabels.getSize()
         let pos = slLabels.getPosition()
@@ -238,11 +257,17 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Label
         case .CENTER:
             pos.x = (slLoop.getSLHolder().getLNode().getSize().x - size.x) / 2
         case .LEFT:
-            pos.x = alignRef!.getLPort().getPosition().x + alignRef!.getLPort().getAnchor().x
+            if let ref = alignRef {
+                pos.x = ref.getLPort().getPosition().x + ref.getLPort().getAnchor().x
+            }
         case .RIGHT:
-            pos.x = alignRef!.getLPort().getPosition().x + alignRef!.getLPort().getAnchor().x - size.x
+            if let ref = alignRef {
+                pos.x = ref.getLPort().getPosition().x + ref.getLPort().getAnchor().x - size.x
+            }
         case .TOP:
-            pos.y = alignRef!.getLPort().getPosition().y + alignRef!.getLPort().getAnchor().y
+            if let ref = alignRef {
+                pos.y = ref.getLPort().getPosition().y + ref.getLPort().getAnchor().y
+            }
         }
     }
 }

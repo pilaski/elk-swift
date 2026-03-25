@@ -78,8 +78,8 @@ package final class HorizontalPortPlacementSizeCalculator {
                         )
                     )
                 }
-            } else {
-                let requiredSpace = previousPortWidth + previousPortContext!.portMargin.right
+            } else if let prevPortContext = previousPortContext {
+                let requiredSpace = previousPortWidth + prevPortContext.portMargin.right
                     + nodeContext.portPortSpacing + currentPortContext.portMargin.left
                 minWidth = max(
                     minWidth,
@@ -100,8 +100,8 @@ package final class HorizontalPortPlacementSizeCalculator {
         if surroundingPortMargins.right > 0 {
             var requiredSpace = previousPortWidth + surroundingPortMargins.right
 
-            if portLabelsInside {
-                requiredSpace += previousPortContext!.portMargin.right
+            if portLabelsInside, let prevPortContext = previousPortContext {
+                requiredSpace += prevPortContext.portMargin.right
             }
 
             minWidth = max(

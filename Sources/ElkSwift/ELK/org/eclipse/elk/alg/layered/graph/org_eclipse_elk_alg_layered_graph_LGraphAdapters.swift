@@ -59,17 +59,17 @@ package final class LGraphAdapters {
         package func setVolatileId(_ id: Int) { element.id = id }
 
         package func getNodes() -> [NodeAdapter] {
-            if nodeAdapters == nil {
-                nodeAdapters = []
-                for layer in element.getLayers() {
-                    for node in layer.getNodes() {
-                        if nodeFilter(node) {
-                            nodeAdapters?.append(LNodeAdapter(parentGraphAdapter: self, element: node, transparentNorthSouthEdges: transparentNorthSouthEdges))
-                        }
+            if let cached = nodeAdapters { return cached }
+            var computed: [NodeAdapter] = []
+            for layer in element.getLayers() {
+                for node in layer.getNodes() {
+                    if nodeFilter(node) {
+                        computed.append(LNodeAdapter(parentGraphAdapter: self, element: node, transparentNorthSouthEdges: transparentNorthSouthEdges))
                     }
                 }
             }
-            return nodeAdapters!
+            nodeAdapters = computed
+            return computed
         }
     }
 
@@ -100,17 +100,17 @@ package final class LGraphAdapters {
         package func getGraph() -> GraphAdapter? { return parentGraphAdapter }
 
         package func getLabels() -> [LabelAdapter] {
-            if labelAdapters == nil {
-                labelAdapters = element.getLabels().map { LLabelAdapter($0) }
-            }
-            return labelAdapters!
+            if let cached = labelAdapters { return cached }
+            let computed = element.getLabels().map { LLabelAdapter($0) }
+            labelAdapters = computed
+            return computed
         }
 
         package func getPorts() -> [PortAdapter] {
-            if portAdapters == nil {
-                portAdapters = element.getPorts().map { LPortAdapter($0, transparentNorthSouthEdges: transparentNorthSouthEdges) }
-            }
-            return portAdapters!
+            if let cached = portAdapters { return cached }
+            let computed = element.getPorts().map { LPortAdapter($0, transparentNorthSouthEdges: transparentNorthSouthEdges) }
+            portAdapters = computed
+            return computed
         }
 
         package func getIncomingEdges() -> [EdgeAdapter] { return [] }
@@ -168,10 +168,10 @@ package final class LGraphAdapters {
         package func getSide() -> PortSide { return element.getSide() }
 
         package func getLabels() -> [LabelAdapter] {
-            if labelAdapters == nil {
-                labelAdapters = element.getLabels().map { LLabelAdapter($0) }
-            }
-            return labelAdapters!
+            if let cached = labelAdapters { return cached }
+            let computed = element.getLabels().map { LLabelAdapter($0) }
+            labelAdapters = computed
+            return computed
         }
 
         package func getIncomingEdges() -> [EdgeAdapter] {

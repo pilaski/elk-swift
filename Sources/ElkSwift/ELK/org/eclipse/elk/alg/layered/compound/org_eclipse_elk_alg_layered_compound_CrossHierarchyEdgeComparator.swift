@@ -63,7 +63,11 @@ package final class CrossHierarchyEdgeComparator {
                 return level
             }
 
-            currentGraph = currentNode.graph!
+            guard let graph = currentNode.graph else {
+                assertionFailure("Invalid hierarchy: node has no graph")
+                return level
+            }
+            currentGraph = graph
             level += 1
         }
     }

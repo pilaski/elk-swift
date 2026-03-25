@@ -58,9 +58,7 @@ package final class InstancePool<T> {
             if let instance = created as? T {
                 return instance
             }
-            assertionFailure("InstancePool: factory.create() returned unexpected type")
-            // Force cast as last resort — assertionFailure fires in debug builds
-            return created as! T
+            fatalError("InstancePool: factory created \(type(of: created)) but expected \(T.self)")
         }
         return instances.removeFirst()
     }

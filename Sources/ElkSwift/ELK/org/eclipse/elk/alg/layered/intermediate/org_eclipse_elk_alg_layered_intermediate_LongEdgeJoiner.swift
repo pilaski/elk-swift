@@ -34,17 +34,19 @@ package final class org_eclipse_elk_alg_layered_intermediate_LongEdgeJoiner {
         let outputPortEdges = outputPort.outgoingEdges
         var edgeCount = inputPortEdges.count
 
-        let unnecessaryBendpoint = longEdgeDummy.ports[0].getAbsoluteAnchor()
+        guard let firstPort = longEdgeDummy.ports.first else { return }
+        let unnecessaryBendpoint = firstPort.getAbsoluteAnchor()
 
         while edgeCount > 0 {
             edgeCount -= 1
 
-            let survivingEdge = inputPortEdges[0]
-            let droppedEdge = outputPortEdges[0]
+            guard let survivingEdge = inputPortEdges.first,
+                  let droppedEdge = outputPortEdges.first else { break }
 
-            let targetIncomingEdges = droppedEdge.target!.incomingEdges
+            guard let targetPort = droppedEdge.target else { continue }
+            let targetIncomingEdges = targetPort.incomingEdges
             let droppedEdgeListIndex = targetIncomingEdges.firstIndex(where: { $0 === droppedEdge }) ?? 0
-            survivingEdge.setTargetAndInsertAtIndex(droppedEdge.target, droppedEdgeListIndex)
+            survivingEdge.setTargetAndInsertAtIndex(targetPort, droppedEdgeListIndex)
 
             droppedEdge.setSource(nil)
             droppedEdge.setTarget(nil)
@@ -66,13 +68,15 @@ package final class org_eclipse_elk_alg_layered_intermediate_LongEdgeJoiner {
             let survivingJunctionPoints = survivingEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain
             let droppedJunctionPoints = droppedEdge.getProperty(LayeredOptions.JUNCTION_POINTS) as? KVectorChain
             if let droppedJP = droppedJunctionPoints {
-                var sjp = survivingJunctionPoints
-                if sjp == nil {
+                let sjp: KVectorChain
+                if let existing = survivingJunctionPoints {
+                    sjp = existing
+                } else {
                     sjp = KVectorChain()
-                    survivingEdge.setProperty(LayeredOptions.JUNCTION_POINTS, value: sjp!)
+                    survivingEdge.setProperty(LayeredOptions.JUNCTION_POINTS, value: sjp)
                 }
                 for jp in droppedJP {
-                    sjp!.add(KVector(jp))
+                    sjp.add(KVector(jp))
                 }
             }
         }

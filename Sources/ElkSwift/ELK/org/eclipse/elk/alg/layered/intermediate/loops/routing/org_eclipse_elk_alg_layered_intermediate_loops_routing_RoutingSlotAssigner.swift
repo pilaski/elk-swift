@@ -27,8 +27,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
     private func computeLabelCrossingMatrix(_ slHolder: SelfLoopHolder) -> [[Bool]] {
         var labelID = 0
         for slLoop in slHolder.getSLHyperLoops() {
-            if slLoop.getSLLabels() != nil {
-                slLoop.getSLLabels()!.id = labelID
+            if let slLabels = slLoop.getSLLabels() {
+                slLabels.id = labelID
                 labelID += 1
             }
         }
@@ -38,15 +38,15 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
         let slLoops = slHolder.getSLHyperLoops()
         for sl1Idx in 0..<slLoops.count {
             let slLoop1 = slLoops[sl1Idx]
-            guard slLoop1.getSLLabels() != nil else { continue }
+            guard let slLabels1 = slLoop1.getSLLabels() else { continue }
 
             for sl2Idx in (sl1Idx + 1)..<slLoops.count {
                 let slLoop2 = slLoops[sl2Idx]
-                guard slLoop2.getSLLabels() != nil else { continue }
+                guard let slLabels2 = slLoop2.getSLLabels() else { continue }
 
                 let overlap = labelsOverlap(slLoop1, slLoop2)
-                crossingMatrix[slLoop1.getSLLabels()!.id][slLoop2.getSLLabels()!.id] = overlap
-                crossingMatrix[slLoop2.getSLLabels()!.id][slLoop1.getSLLabels()!.id] = overlap
+                crossingMatrix[slLabels1.id][slLabels2.id] = overlap
+                crossingMatrix[slLabels2.id][slLabels1.id] = overlap
             }
         }
 
@@ -119,8 +119,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
         let firstAboveSecondCrossings = countCrossings(slLoop1, slLoop2)
         let secondAboveFirstCrossings = countCrossings(slLoop2, slLoop1)
 
-        let segment1 = slLoopToSegmentMap[ObjectIdentifier(slLoop1)]!
-        let segment2 = slLoopToSegmentMap[ObjectIdentifier(slLoop2)]!
+        guard let segment1 = slLoopToSegmentMap[ObjectIdentifier(slLoop1)],
+              let segment2 = slLoopToSegmentMap[ObjectIdentifier(slLoop2)] else { return }
 
         if firstAboveSecondCrossings < secondAboveFirstCrossings {
             _ = HyperEdgeSegmentDependency.createAndAddRegular(
@@ -193,7 +193,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
 
     private func assignRawRoutingSlotsToLoops(_ slHolder: SelfLoopHolder) {
         for slLoop in slHolder.getSLHyperLoops() {
-            let slot = slLoopToSegmentMap[ObjectIdentifier(slLoop)]!.getRoutingSlot()
+            guard let segment = slLoopToSegmentMap[ObjectIdentifier(slLoop)] else { continue }
+            let slot = segment.getRoutingSlot()
             for portSide in slLoop.getOccupiedPortSides() {
                 slLoop.setRoutingSlot(portSide, slot)
             }
@@ -242,8 +243,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
                     }
                 }
 
-                if slLoop.getSLLabels() != nil {
-                    let ourLabelIdx = slLoop.getSLLabels()!.id
+                if let ourLabels = slLoop.getSLLabels() {
+                    let ourLabelIdx = ourLabels.id
                     var slotsWithLabelConflicts = Set<Int>()
 
                     for otherLabelIdx in 0..<labelCrossingMatrix.count {
@@ -264,8 +265,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_routing_Routi
                     }
                 }
 
-                if slLoop.getSLLabels() != nil {
-                    slotAssignedToLabel[slLoop.getSLLabels()!.id] = lowestAvailableSlot
+                if let endLabels = slLoop.getSLLabels() {
+                    slotAssignedToLabel[endLabels.id] = lowestAvailableSlot
                 }
             }
         }

@@ -14,7 +14,10 @@ package final class org_eclipse_elk_alg_layered_p1cycles_GreedyModelOrderCycleBr
     package override func chooseNodeWithMaxOutflow(
         _ nodes: [org_eclipse_elk_alg_layered_graph_LNode]
     ) -> org_eclipse_elk_alg_layered_graph_LNode {
-        precondition(!nodes.isEmpty, "nodes must not be empty")
+        guard !nodes.isEmpty else {
+            assertionFailure("chooseNodeWithMaxOutflow called with empty nodes")
+            return LNode(LGraph())
+        }
 
         var returnNode: org_eclipse_elk_alg_layered_graph_LNode?
         var minimumModelOrder = Int.max

@@ -159,17 +159,17 @@ package class org_eclipse_elk_alg_layered_p3order_ModelOrderBarycenterHeuristic:
         let id1 = ObjectIdentifier(n1)
         let id2 = ObjectIdentifier(n2)
 
-        if biggerThan[id1] == nil { biggerThan[id1] = [] }
-        else if biggerThan[id1]!.contains(id2) { return 1 }
+        if let set = biggerThan[id1], set.contains(id2) { return 1 }
+        else if biggerThan[id1] == nil { biggerThan[id1] = [] }
 
-        if biggerThan[id2] == nil { biggerThan[id2] = [] }
-        else if biggerThan[id2]!.contains(id1) { return -1 }
+        if let set = biggerThan[id2], set.contains(id1) { return -1 }
+        else if biggerThan[id2] == nil { biggerThan[id2] = [] }
 
-        if smallerThan[id1] == nil { smallerThan[id1] = [] }
-        else if smallerThan[id1]!.contains(id2) { return -1 }
+        if let set = smallerThan[id1], set.contains(id2) { return -1 }
+        else if smallerThan[id1] == nil { smallerThan[id1] = [] }
 
-        if smallerThan[id2] == nil { smallerThan[id2] = [] }
-        else if smallerThan[id2]!.contains(id1) { return 1 }
+        if let set = smallerThan[id2], set.contains(id1) { return 1 }
+        else if smallerThan[id2] == nil { smallerThan[id2] = [] }
 
         return 0
     }

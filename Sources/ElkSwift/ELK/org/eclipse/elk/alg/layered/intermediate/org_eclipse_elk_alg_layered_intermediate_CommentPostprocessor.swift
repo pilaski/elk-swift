@@ -137,7 +137,11 @@ package final class CommentPostprocessor: ILayoutProcessor {
      */
     package func getBoxPort(_ commentBox: LNode) -> LPort {
         guard let nodePort = commentBox.getProperty(InternalProperties.COMMENT_CONN_PORT) as? LPort else {
-            return commentBox.ports.first!
+            guard let port = commentBox.ports.first else {
+                assertionFailure("getBoxPort: commentBox has no ports")
+                return LPort()
+            }
+            return port
         }
 
         for port in commentBox.ports {
@@ -152,6 +156,10 @@ package final class CommentPostprocessor: ILayoutProcessor {
                 return port
             }
         }
-        return commentBox.ports.first!
+        guard let port = commentBox.ports.first else {
+            assertionFailure("getBoxPort: commentBox has no ports after iteration")
+            return LPort()
+        }
+        return port
     }
 }

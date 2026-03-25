@@ -75,8 +75,8 @@ package final class org_eclipse_elk_alg_layered_p5edges_orthogonal_HyperEdgeSegm
         var selected: Set<ObjectIdentifier> = []
 
         for dependency in dependencies {
-            let sourceSegment = dependency.getSource()!
-            let targetSegment = dependency.getTarget()!
+            guard let sourceSegment = dependency.getSource(),
+                  let targetSegment = dependency.getTarget() else { continue }
 
             if selected.contains(ObjectIdentifier(sourceSegment))
                 || selected.contains(ObjectIdentifier(targetSegment)) {
@@ -218,13 +218,13 @@ package final class org_eclipse_elk_alg_layered_p5edges_orthogonal_HyperEdgeSegm
         let rating = AreaRating(0, 0)
 
         for dependency in segment.getIncomingSegmentDependencies() {
-            let otherSegment = dependency.getSource()!
+            guard let otherSegment = dependency.getSource() else { continue }
             updateConsideringBothOrderings(rating, splitSegment, otherSegment)
             updateConsideringBothOrderings(rating, splitPartner, otherSegment)
         }
 
         for dependency in segment.getOutgoingSegmentDependencies() {
-            let otherSegment = dependency.getTarget()!
+            guard let otherSegment = dependency.getTarget() else { continue }
             updateConsideringBothOrderings(rating, splitSegment, otherSegment)
             updateConsideringBothOrderings(rating, splitPartner, otherSegment)
         }

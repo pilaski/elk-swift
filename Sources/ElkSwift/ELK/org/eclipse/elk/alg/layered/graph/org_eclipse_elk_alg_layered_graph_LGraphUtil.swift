@@ -421,12 +421,18 @@ package final class LGraphUtil {
             default: break
         }
         
-        if let port = port {
-            port.setNode(node)
-            port.side = side
-            centerPoint(port.position, boundary: node.size, side: side)
+        guard let port = port else {
+            // Fallback: create a default port if neither INPUT nor OUTPUT was matched
+            let fallback = LPort()
+            fallback.setNode(node)
+            fallback.side = side
+            centerPoint(fallback.position, boundary: node.size, side: side)
+            return fallback
         }
-        return port!
+        port.setNode(node)
+        port.side = side
+        centerPoint(port.position, boundary: node.size, side: side)
+        return port
     }
     
     package static func initializePort(_ port: LPort, _ portConstraints: PortConstraints, _ direction: Direction, _ anchorPos: KVector?) {
@@ -730,7 +736,16 @@ package final class LGraphUtil {
             result = graph.getProperty(property) as? T
         }
 
-        return result!
+        guard let result = result else {
+            assertionFailure("getIndividualOrInherited: no value found for property '\(property)' on node or its graph")
+            // All current callers expect Double; fall back to zero.
+            if let fallback = 0.0 as? T { return fallback }
+            if let fallback = 0 as? T { return fallback }
+            // Should never be reached — all current callers use numeric types.
+            assertionFailure("getIndividualOrInherited: no fallback available for \(T.self)")
+            return property.defaultValue as! T
+        }
+        return result
     }
     
     package static func getDirection(_ graph: LGraph) -> Direction {

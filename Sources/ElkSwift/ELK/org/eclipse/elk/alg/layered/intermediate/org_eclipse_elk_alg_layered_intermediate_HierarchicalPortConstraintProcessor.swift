@@ -159,7 +159,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_HierarchicalPortCon
 
                 // Iterate over the node's incoming edges
                 for edge in currentNode.getIncomingEdges() {
-                    let sourceNode = edge.getSource()!.getNode()!
+                    guard let sourceNode = edge.getSource()?.getNode() else { continue }
 
                     // Check if it's a northern / southern dummy node
                     if !isNorthernOrSouthernDummy(sourceNode) {
@@ -168,22 +168,23 @@ package final class org_eclipse_elk_alg_layered_intermediate_HierarchicalPortCon
 
                     // See if a dummy has already been created for the previous layer
                     let originKey = ObjectIdentifier(sourceNode.getProperty(InternalProperties.ORIGIN) as AnyObject)
-                    var prevLayerDummy = prevExtPortToDummyNodesMap[originKey]
-
-                    if prevLayerDummy == nil {
+                    let prevLayerDummy: LNode
+                    if let existing = prevExtPortToDummyNodesMap[originKey] {
+                        prevLayerDummy = existing
+                    } else {
                         // No. Create one.
                         prevLayerDummy = createDummy(layeredGraph, sourceNode)
                         prevExtPortToDummyNodesMap[originKey] = prevLayerDummy
-                        prevNewDummyNodes.append(prevLayerDummy!)
+                        prevNewDummyNodes.append(prevLayerDummy)
                     }
 
                     // Reroute the edge
-                    edge.setSource(prevLayerDummy!.getPorts()[Self.DUMMY_OUTPUT_PORT])
+                    edge.setSource(prevLayerDummy.getPorts()[Self.DUMMY_OUTPUT_PORT])
                 }
 
                 // Iterate over the node's outgoing edges
                 for edge in currentNode.getOutgoingEdges() {
-                    let targetNode = edge.getTarget()!.getNode()!
+                    guard let targetNode = edge.getTarget()?.getNode() else { continue }
 
                     // Check if it's a northern / southern dummy node
                     if !isNorthernOrSouthernDummy(targetNode) {
@@ -192,17 +193,18 @@ package final class org_eclipse_elk_alg_layered_intermediate_HierarchicalPortCon
 
                     // See if a dummy has already been created for the next layer
                     let originKey = ObjectIdentifier(targetNode.getProperty(InternalProperties.ORIGIN) as AnyObject)
-                    var nextLayerDummy = nextExtPortToDummyNodesMap[originKey]
-
-                    if nextLayerDummy == nil {
+                    let nextLayerDummy: LNode
+                    if let existing = nextExtPortToDummyNodesMap[originKey] {
+                        nextLayerDummy = existing
+                    } else {
                         // No. Create one.
                         nextLayerDummy = createDummy(layeredGraph, targetNode)
                         nextExtPortToDummyNodesMap[originKey] = nextLayerDummy
-                        nextNewDummyNodes.append(nextLayerDummy!)
+                        nextNewDummyNodes.append(nextLayerDummy)
                     }
 
                     // Reroute the edge
-                    edge.setTarget(nextLayerDummy!.getPorts()[Self.DUMMY_INPUT_PORT])
+                    edge.setTarget(nextLayerDummy.getPorts()[Self.DUMMY_INPUT_PORT])
                 }
             }
 

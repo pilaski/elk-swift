@@ -565,7 +565,8 @@ package final class ElkUtil {
                     } else {
                         // let p3 be the next bend point of the other connection
                         let otherPointIndex = reverse ? otherPoints.count - 1 - i : i
-                        let p3 = KVector(otherPoints[otherPointIndex]).add(offsetMap[ObjectIdentifier(otherSection)]!)
+                        let sectionOffset = offsetMap[ObjectIdentifier(otherSection)] ?? KVector()
+                        let p3 = KVector(otherPoints[otherPointIndex]).add(sectionOffset)
                         
                         if p2.x != p3.x || p2.y != p3.y {
                             // the next point of this and the other connection differ

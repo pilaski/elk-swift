@@ -23,7 +23,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_SelfHyperLoop
 
     package init(_ slLoop: SelfHyperLoop) {
         let lNode = slLoop.getSLHolder().getLNode()
-        self.layoutDirection = lNode.getGraph()!.getProperty(LayeredOptions.DIRECTION) as? Direction ?? .RIGHT
+        self.layoutDirection = lNode.getGraph()?.getProperty(LayeredOptions.DIRECTION) as? Direction ?? .RIGHT
         self.labelLabelSpacing = LGraphUtil.getIndividualOrInherited(lNode, property: LayeredOptions.SPACING_LABEL_LABEL)
     }
 

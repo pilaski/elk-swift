@@ -305,7 +305,8 @@ package final class org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRou
             segmentSplitter = org_eclipse_elk_alg_layered_p5edges_orthogonal_HyperEdgeSegmentSplitter(self)
         }
 
-        segmentSplitter!.splitSegments(cycleDependencies, &edgeSegments, criticalConflictThreshold)
+        guard let splitter = segmentSplitter else { return }
+        splitter.splitSegments(cycleDependencies, &edgeSegments, criticalConflictThreshold)
     }
 
     /// Finds and breaks non-critical cycles by removing and reversing non-critical dependencies.

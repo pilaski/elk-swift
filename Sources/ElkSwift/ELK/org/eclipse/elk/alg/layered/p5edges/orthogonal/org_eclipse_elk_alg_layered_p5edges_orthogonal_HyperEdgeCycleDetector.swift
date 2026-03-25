@@ -310,9 +310,9 @@ package final class org_eclipse_elk_alg_layered_p5edges_orthogonal_HyperEdgeCycl
             return min(index, bound - 1)
         }
 
-        if random != nil {
-            seededState = seed(from: random!)
-            return nextRandomInt(bound, random, &seededState)
+        if let rng = random {
+            seededState = seed(from: rng)
+            return nextRandomInt(bound, rng, &seededState)
         }
 
         return Int.random(in: 0..<bound)

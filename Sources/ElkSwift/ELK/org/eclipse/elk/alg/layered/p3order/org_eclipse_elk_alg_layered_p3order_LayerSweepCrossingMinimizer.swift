@@ -553,11 +553,6 @@ package class org_eclipse_elk_alg_layered_p3order_LayerSweepCrossingMinimizer:
             }
         }
 
-        guard sortedDummies.count >= layerCloseToNodeEdge.count else {
-            preconditionFailure(
-                "Expected \(layerCloseToNodeEdge.count) hierarchical ports, but found only \(sortedDummies.count)."
-            )
-        }
         return Array(sortedDummies.prefix(layerCloseToNodeEdge.count))
     }
 

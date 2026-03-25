@@ -88,20 +88,22 @@ package class org_eclipse_elk_alg_layered_p3order_GraphInfoHolder:
         switch crossMinType {
         case .BARYCENTER:
             let constraintResolver = org_eclipse_elk_alg_layered_p3order_ForsterConstraintResolver(_currentNodeOrder)
-            if forceModelOrder {
-                _crossMinimizer = org_eclipse_elk_alg_layered_p3order_ModelOrderBarycenterHeuristic(
-                    constraintResolver,
-                    randomValue,
-                    sharedPortDistributor!,
-                    _currentNodeOrder
-                )
-            } else {
-                _crossMinimizer = org_eclipse_elk_alg_layered_p3order_BarycenterHeuristic(
-                    constraintResolver,
-                    randomValue,
-                    sharedPortDistributor!,
-                    _currentNodeOrder
-                )
+            if let dist = sharedPortDistributor {
+                if forceModelOrder {
+                    _crossMinimizer = org_eclipse_elk_alg_layered_p3order_ModelOrderBarycenterHeuristic(
+                        constraintResolver,
+                        randomValue,
+                        dist,
+                        _currentNodeOrder
+                    )
+                } else {
+                    _crossMinimizer = org_eclipse_elk_alg_layered_p3order_BarycenterHeuristic(
+                        constraintResolver,
+                        randomValue,
+                        dist,
+                        _currentNodeOrder
+                    )
+                }
             }
         case .MEDIAN:
             break // already set above

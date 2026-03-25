@@ -274,8 +274,8 @@ package final class ElkMath {
     // */
     package static func approximateBezierSpline(_ controlPoints: KVectorChain) -> KVectorChain {
         let ctrlPtCount = controlPoints.size()
-        var spline = KVectorChain()
-        var controlIter = controlPoints.listIterator()
+        let spline = KVectorChain()
+        let controlIter = controlPoints.listIterator()
         var currentPoint = controlIter.next()
         spline.add(currentPoint)
         while controlIter.hasNext() {
@@ -450,8 +450,9 @@ package final class ElkMath {
 
         // start in the middle of the bezier curve, t=0.5
         let _ = bezier(w, degree, 1.0 / 2, &left, &right)
-        let leftCount = findRoots(left!, degree, &leftT, depth + 1)
-        let rightCount = findRoots(right!, degree, &rightT, depth + 1)
+        guard let l = left, let r = right else { return 0 }
+        let leftCount = findRoots(l, degree, &leftT, depth + 1)
+        let rightCount = findRoots(r, degree, &rightT, depth + 1)
         
         // Gather solutions together
         for i in 0..<leftCount {
@@ -603,13 +604,13 @@ package final class ElkMath {
 
         if left != nil {
             for j in 0...degree {
-                left![j] = p[j][0]
+                left?[j] = p[j][0]
             }
         }
 
         if right != nil {
             for j in 0...degree {
-                right![j] = p[degree - j][j]
+                right?[j] = p[degree - j][j]
             }
         }
         return p[degree][0]
@@ -936,7 +937,7 @@ package final class ElkMath {
         }
         
         var pathIt = path.makeIterator()
-        guard var first = pathIt.next() else { return false }
+        guard let first = pathIt.next() else { return false }
         var p1 = first
         // check every segment
         while let p2 = pathIt.next() {
@@ -949,10 +950,10 @@ package final class ElkMath {
         if intersects(rect, p1, first) {
             return true
         }
-        
+
         return false
     }
-    
+
     ///**
     // * Checks whether the straight line {@code l} defined by {@code (p1, p2)} intersects with at least one of the four
     // * segments defining the passed rectangle. If {@code l} is fully contained within {@code rect}'s bounding box, no
@@ -1130,27 +1131,32 @@ package final class ElkMath {
         // check whether (b + v) intersects a to catch an edge case, where one ray exactly hits an endpoint
         // of a but the other ray is too short to reach a.
         intersection = intersects2(a1, a2.clone().sub(a1), b1.clone().add(v), b2.clone().sub(b1))
-        let edgeCase = intersection != nil && !(intersection!.equalsFuzzily(a1) || intersection!.equalsFuzzily(a2))
-        
+        let edgeCase: Bool
+        if let inter = intersection {
+            edgeCase = !(inter.equalsFuzzily(a1) || inter.equalsFuzzily(a2))
+        } else {
+            edgeCase = false
+        }
+
         // trace ray from point b1 to segment a in direction v
         intersection = intersects2(a1, a2.clone().sub(a1), b1, v)
-        if intersection != nil {
-            if intersection!.equalsFuzzily(a1) == intersection!.equalsFuzzily(a2) || edgeCase {
+        if let inter = intersection {
+            if inter.equalsFuzzily(a1) == inter.equalsFuzzily(a2) || edgeCase {
                 // update the distance result
-                result = min(result, intersection!.sub(b1).length())
+                result = min(result, inter.sub(b1).length())
             } else {
                 // ignore intersection if the ray exactly hits an endpoint of b
                 // but track it to allow it only for one ray per segment
                 endpointHit = true
             }
         }
-        
+
         // trace ray from point b2 to segment a in direction v
         intersection = intersects2(a1, a2.clone().sub(a1), b2, v)
-        if intersection != nil {
-            if endpointHit || intersection!.equalsFuzzily(a1) == intersection!.equalsFuzzily(a2) || edgeCase {
+        if let inter = intersection {
+            if endpointHit || inter.equalsFuzzily(a1) == inter.equalsFuzzily(a2) || edgeCase {
                 // update the distance result
-                result = min(result, intersection!.sub(b2).length())
+                result = min(result, inter.sub(b2).length())
             }
         }
         
@@ -1172,8 +1178,8 @@ package final class ElkMath {
         }
         
         var pathIt = path.makeIterator()
-        guard var first = pathIt.next() else { return false }
-        var p1 = first 
+        guard let first = pathIt.next() else { return false }
+        var p1 = first
         // check every segment
         while let p2 = pathIt.next() {
             if !contains(rect, p1, p2) {
@@ -1185,7 +1191,7 @@ package final class ElkMath {
         if !contains(rect, p1, first) {
             return false
         }
-        
+
         return true
     }
     

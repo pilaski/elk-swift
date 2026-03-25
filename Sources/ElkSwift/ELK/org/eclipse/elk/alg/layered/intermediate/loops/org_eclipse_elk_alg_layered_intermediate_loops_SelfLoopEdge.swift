@@ -46,7 +46,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_loops_SelfLoopEdge:
     }
 
     package func getLabelSide() -> PortSide {
-        return self.slHyperLoop!.getSLLabels()!.getSide()
+        guard let loop = self.slHyperLoop, let labels = loop.getSLLabels() else { return .UNDEFINED }
+        return labels.getSide()
     }
 
     // MARK: - Hashable

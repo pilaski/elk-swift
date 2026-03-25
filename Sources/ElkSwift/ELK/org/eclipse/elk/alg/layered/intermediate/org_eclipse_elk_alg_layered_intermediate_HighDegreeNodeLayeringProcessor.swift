@@ -101,7 +101,7 @@ package class org_eclipse_elk_alg_layered_intermediate_HighDegreeNodeLayeringPro
                 if hdni.incTreeRoots == nil {
                     hdni.incTreeRoots = [LNode]()
                 }
-                hdni.incTreeRoots!.append(src)
+                hdni.incTreeRoots?.append(src)
             }
         }
 
@@ -118,7 +118,7 @@ package class org_eclipse_elk_alg_layered_intermediate_HighDegreeNodeLayeringPro
                 if hdni.outTreeRoots == nil {
                     hdni.outTreeRoots = [LNode]()
                 }
-                hdni.outTreeRoots!.append(tgt)
+                hdni.outTreeRoots?.append(tgt)
             }
         }
 

@@ -97,14 +97,16 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelSideSelector {
                                                   _ topGroup: Bool, _ bottomGroup: Bool, _ defaultSide: LabelSide) {
         if topGroup
             && (!bottomGroup || dummyNodes.count > 1)
-            && labelDummyCount == 1
-            && dummyNodes.first?.type == .label {
-            applyLabelSideToNode(dummyNodes.first!, .ABOVE)
+            && labelDummyCount == 1,
+            let first = dummyNodes.first,
+            first.type == .label {
+            applyLabelSideToNode(first, .ABOVE)
         } else if bottomGroup
             && (!topGroup || dummyNodes.count > 1)
-            && labelDummyCount == 1
-            && dummyNodes.last?.type == .label {
-            applyLabelSideToNode(dummyNodes.last!, .BELOW)
+            && labelDummyCount == 1,
+            let last = dummyNodes.last,
+            last.type == .label {
+            applyLabelSideToNode(last, .BELOW)
         } else if dummyNodes.count == 2 {
             applyLabelSideToNode(dummyNodes.removeFirst(), .ABOVE)
             applyLabelSideToNode(dummyNodes.removeFirst(), .BELOW)
@@ -164,8 +166,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelSideSelector {
 
         for port in node.ports {
             if port.side != currentPortSide {
-                if !endLabelQueue.isEmpty {
-                    smartForRegularNodePortEndLabels(&endLabelQueue, currentPortSide!, defaultSide)
+                if !endLabelQueue.isEmpty, let side = currentPortSide {
+                    smartForRegularNodePortEndLabels(&endLabelQueue, side, defaultSide)
                 }
                 endLabelQueue.removeAll()
                 currentPortSide = port.side
@@ -214,7 +216,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelSideSelector {
                 if effectiveSide == .ABOVE {
                     portPos = labelDummy.size.y - ceil(thickness / 2)
                 } else if effectiveSide == .INLINE {
-                    let edgeLabelSpacing = labelDummy.getGraph()!.getProperty(LayeredOptions.SPACING_EDGE_LABEL) as? Double ?? 0.0
+                    guard let graph = labelDummy.getGraph() else { return }
+                    let edgeLabelSpacing = graph.getProperty(LayeredOptions.SPACING_EDGE_LABEL) as? Double ?? 0.0
                     portPos = ceil((labelDummy.size.y - edgeLabelSpacing - thickness)) / 2.0
                     labelDummy.size.y -= edgeLabelSpacing
                     labelDummy.size.y -= thickness

@@ -84,17 +84,19 @@ package struct TreeMultimap<K: Hashable, V>: Sequence {
         if storage[key] == nil {
             storage[key] = [value]
         } else {
+            var arr = storage[key, default: []]
             var lo = 0
-            var hi = storage[key]!.count
+            var hi = arr.count
             while lo < hi {
                 let mid = (lo + hi) / 2
-                if valueComparator(storage[key]![mid], value) {
+                if valueComparator(arr[mid], value) {
                     lo = mid + 1
                 } else {
                     hi = mid
                 }
             }
-            storage[key]!.insert(value, at: lo)
+            arr.insert(value, at: lo)
+            storage[key] = arr
         }
     }
 
@@ -120,7 +122,7 @@ package struct TreeMultimap<K: Hashable, V>: Sequence {
 
     /// All values flattened, iterated in key-sorted then value-sorted order.
     package func values() -> [V] {
-        sortedKeys.flatMap { storage[$0]! }
+        sortedKeys.flatMap { storage[$0, default: []] }
     }
 
     /// Whether the multimap has no entries.
@@ -130,7 +132,7 @@ package struct TreeMultimap<K: Hashable, V>: Sequence {
 
     /// Sequence conformance — iterates as `(K, [V])` pairs in key-sorted order.
     package func makeIterator() -> IndexingIterator<[(K, [V])]> {
-        sortedKeys.map { ($0, storage[$0]!) }.makeIterator()
+        sortedKeys.map { ($0, storage[$0, default: []]) }.makeIterator()
     }
 }
 

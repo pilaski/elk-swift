@@ -59,7 +59,7 @@ package final class org_eclipse_elk_alg_layered_p3order_LayerTotalPortDistributo
             return Float(pos)
 
         case .UNDEFINED:
-            preconditionFailure("Illegal port type: UNDEFINED")
+            return 0
         }
     }
 }

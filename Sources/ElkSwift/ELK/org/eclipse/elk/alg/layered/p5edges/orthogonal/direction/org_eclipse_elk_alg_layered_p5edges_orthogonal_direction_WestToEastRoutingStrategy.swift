@@ -5,7 +5,8 @@ import Foundation
 package class org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_WestToEastRoutingStrategy: org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRoutingDirectionStrategy {
 
     override package func getPortPositionOnHyperNode(_ port: org_eclipse_elk_alg_layered_graph_LPort) -> Double {
-        return port.getNode()!.getPosition().y + port.getPosition().y + port.getAnchor().y
+        guard let node = port.getNode() else { return 0 }
+        return node.getPosition().y + port.getPosition().y + port.getAnchor().y
     }
 
     override package func getSourcePortSide() -> org_eclipse_elk_core_options_PortSide {
@@ -34,7 +35,7 @@ package class org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_WestToEas
 
             for edge in port.getOutgoingEdges() {
                 if !edge.isSelfLoop() {
-                    let target = edge.getTarget()!
+                    guard let target = edge.getTarget() else { continue }
                     let targetY = target.getAbsoluteAnchor().y
 
                     if abs(sourceY - targetY) > org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRoutingGenerator.TOLERANCE {
@@ -47,17 +48,16 @@ package class org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_WestToEas
                         addJunctionPointIfNecessary(edge, currentSegment, bend, true)
 
                         // If this segment was split, we need two additional bend points
-                        let splitPartner = segment.getSplitPartner()
-                        if splitPartner != nil {
-                            let splitY = splitPartner!.getIncomingConnectionCoordinates()[0]
+                        if let splitPartner = segment.getSplitPartner() {
+                            let splitY = splitPartner.getIncomingConnectionCoordinates()[0]
 
                             bend = KVector(currentX, splitY)
                             edge.getBendPoints().add(bend)
                             addJunctionPointIfNecessary(edge, currentSegment, bend, true)
 
                             // Advance to the split partner's routing slot
-                            currentX = startPos + Double(splitPartner!.getRoutingSlot()) * edgeSpacing
-                            currentSegment = splitPartner!
+                            currentX = startPos + Double(splitPartner.getRoutingSlot()) * edgeSpacing
+                            currentSegment = splitPartner
 
                             bend = KVector(currentX, splitY)
                             edge.getBendPoints().add(bend)

@@ -226,7 +226,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_HierarchicalPortOrt
             var posSum = 0.0
 
             for connectedPort in dummyInPort.getConnectedPorts() {
-                posSum += connectedPort.getNode()!.getPosition().x + connectedPort.getPosition().x
+                posSum += (connectedPort.getNode()?.getPosition().x ?? 0) + connectedPort.getPosition().x
                     + connectedPort.getAnchor().x
             }
 

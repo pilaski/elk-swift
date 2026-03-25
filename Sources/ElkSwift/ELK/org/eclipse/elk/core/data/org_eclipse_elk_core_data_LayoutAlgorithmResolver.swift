@@ -36,7 +36,14 @@ package class LayoutAlgorithmResolver: IGraphElementVisitor {
 
         // Stage 2: If we must resolve a layout algorithm, try to fall back on the default if none was specified
         if mustResolve(node) {
-            if algorithmId == nil || algorithmId!.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if let id = algorithmId, !id.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // An algorithm was specified, but not found. Fail!
+                var message = "Layout algorithm '"
+                message.append(id)
+                message.append("' not found for ")
+                ElkUtil.printElementPath(node, builder: &message)
+                throw ELK.Error.runtimeError(message)
+            } else {
                 // No algorithm was specified, load the default one
                 let defaultAlgorithmId = getDefaultLayoutAlgorithmID()
 
@@ -47,14 +54,6 @@ package class LayoutAlgorithmResolver: IGraphElementVisitor {
                     ElkUtil.printElementPath(node, builder: &message)
                     throw ELK.Error.runtimeError(message)
                 }
-
-            } else {
-                // An algorithm was specified, but not found. Fail!
-                var message = "Layout algorithm '"
-                message.append(algorithmId!)
-                message.append("' not found for ")
-                ElkUtil.printElementPath(node, builder: &message)
-                throw ELK.Error.runtimeError(message)
             }
         }
     }

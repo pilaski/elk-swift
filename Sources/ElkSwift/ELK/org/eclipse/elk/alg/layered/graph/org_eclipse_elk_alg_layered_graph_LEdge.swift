@@ -21,20 +21,21 @@ package final class LEdge: LGraphElement {
     package var labels: [LLabel] = []
 
     package func reverse(_ layeredGraph: LGraph, _ adaptPorts: Bool) {
-        let oldSource = self.source!
-        let oldTarget = self.target!
+        guard let oldSource = self.source, let oldTarget = self.target else { return }
 
         setSource(nil)
         setTarget(nil)
 
-        if adaptPorts, let collect: Bool = oldTarget.getProperty(InternalProperties.INPUT_COLLECT), collect {
-            setSource(LGraphUtil.provideCollectorPort(layeredGraph, node: oldTarget.getNode()!, type: .output, side: .EAST))
+        if adaptPorts, let collect: Bool = oldTarget.getProperty(InternalProperties.INPUT_COLLECT), collect,
+           let oldTargetNode = oldTarget.getNode() {
+            setSource(LGraphUtil.provideCollectorPort(layeredGraph, node: oldTargetNode, type: .output, side: .EAST))
         } else {
             setSource(oldTarget)
         }
 
-        if adaptPorts, let collect: Bool = oldSource.getProperty(InternalProperties.OUTPUT_COLLECT), collect {
-            setTarget(LGraphUtil.provideCollectorPort(layeredGraph, node: oldSource.getNode()!, type: .input, side: .WEST))
+        if adaptPorts, let collect: Bool = oldSource.getProperty(InternalProperties.OUTPUT_COLLECT), collect,
+           let oldSourceNode = oldSource.getNode() {
+            setTarget(LGraphUtil.provideCollectorPort(layeredGraph, node: oldSourceNode, type: .input, side: .WEST))
         } else {
             setTarget(oldSource)
         }
@@ -112,15 +113,15 @@ package final class LEdge: LGraphElement {
     }
 
     package func getOther(_ port: LPort) -> LPort {
-        if port === source { return target! }
-        if port === target { return source! }
+        if port === source, let t = target { return t }
+        if port === target, let s = source { return s }
         assertionFailure("'port' must be either the source port or target port of the edge.")
         return port
     }
 
     package func getOther(_ node: LNode) -> LNode {
-        if node === source?.getNode() { return target!.getNode()! }
-        if node === target?.getNode() { return source!.getNode()! }
+        if node === source?.getNode(), let t = target?.getNode() { return t }
+        if node === target?.getNode(), let s = source?.getNode() { return s }
         assertionFailure("'node' must either be the source node or target node of the edge.")
         return node
     }

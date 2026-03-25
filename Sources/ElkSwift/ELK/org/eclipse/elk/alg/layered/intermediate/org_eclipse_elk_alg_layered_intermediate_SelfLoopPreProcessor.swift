@@ -35,7 +35,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_SelfLoopPreProcesso
 
         let orderFixed: Bool = (lNode.getProperty(LayeredOptions.PORT_CONSTRAINTS) as? PortConstraints)?.isOrderFixed() ?? false
         let hierarchyMode: Bool = nestedGraph != nil
-            && ((nestedGraph!.getProperty(InternalProperties.GRAPH_PROPERTIES) as? Set<GraphProperties>)?
+            && ((nestedGraph?.getProperty(InternalProperties.GRAPH_PROPERTIES) as? Set<GraphProperties>)?
                 .contains(.EXTERNAL_PORTS) ?? false)
 
         if orderFixed || hierarchyMode {

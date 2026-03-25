@@ -26,7 +26,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_InvertedPortProcess
             unassignedNodes.removeAll()
 
             // Iterate through the layer's nodes
-            for node in currentLayer!.nodes {
+            guard let layer = currentLayer else { continue }
+            for node in layer.nodes {
                 // Skip dummy nodes
                 if node.type != .normal {
                     continue

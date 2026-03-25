@@ -31,19 +31,19 @@ package final class RectilinearConvexHull {
         let rch = RectilinearConvexHull()
 
         for p in points {
-            if rch.xMax1 == nil || p.x >= rch.xMax1!.x {
+            if rch.xMax1.map({ p.x >= $0.x }) ?? true {
                 rch.xMax2 = rch.xMax1
                 rch.xMax1 = p
             }
-            if rch.xMin1 == nil || p.x <= rch.xMin1!.x {
+            if rch.xMin1.map({ p.x <= $0.x }) ?? true {
                 rch.xMin2 = rch.xMin1
                 rch.xMin1 = p
             }
-            if rch.yMax1 == nil || p.y >= rch.yMax1!.y {
+            if rch.yMax1.map({ p.y >= $0.y }) ?? true {
                 rch.yMax2 = rch.yMax1
                 rch.yMax1 = p
             }
-            if rch.yMin1 == nil || p.y <= rch.yMin1!.y {
+            if rch.yMin1.map({ p.y <= $0.y }) ?? true {
                 rch.yMin2 = rch.yMin1
                 rch.yMin1 = p
             }
@@ -218,14 +218,16 @@ package final class RectilinearConvexHull {
         }
 
         package func handle(_ p: Point) {
-            if queued != nil &&
-                (p.x != queuedPnt!.x ||
-                 Point.Quadrant.isOneLeftOneRight(queuedPnt!.quadrant!, p.quadrant!)) {
+            if let qPnt = queuedPnt, let q = queued,
+               let qPntQuadrant = qPnt.quadrant, let pQuadrant = p.quadrant {
+                if p.x != qPnt.x ||
+                    Point.Quadrant.isOneLeftOneRight(qPntQuadrant, pQuadrant) {
 
-                rects.append(queued!)
-                lastX = queued!.x + queued!.width
-                queued = nil
-                queuedPnt = nil
+                    rects.append(q)
+                    lastX = q.x + q.width
+                    queued = nil
+                    queuedPnt = nil
+                }
             }
 
             if let q = p.quadrant, q.isUpper() {

@@ -37,8 +37,7 @@ package final class DummySelfLoopProcessor: ILayoutProcessor {
                             continue
                         }
 
-                        let sourcePort = edge.source!
-                        let targetPort = edge.target!
+                        guard let sourcePort = edge.source, let targetPort = edge.target else { continue }
                         let sourcePortSide = sourcePort.side
                         let targetPortSide = targetPort.side
 

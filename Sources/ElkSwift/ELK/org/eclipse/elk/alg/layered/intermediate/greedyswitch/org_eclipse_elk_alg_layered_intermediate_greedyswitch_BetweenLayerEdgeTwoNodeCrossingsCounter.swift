@@ -165,7 +165,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_greedyswitch_Betwee
         }
 
         private func addAdjacencyOf(_ edge: LEdge) {
-            let adjacentPort = adjacentPortOf(edge, side)
+            guard let adjacentPort = adjacentPortOf(edge, side) else { return }
             let adjacentPortPosition = portPositions[ObjectIdentifier(adjacentPort)] ?? 0
             let lastIndex = adjacencyList.count - 1
             if !adjacencyList.isEmpty && adjacencyList[lastIndex].position == adjacentPortPosition {
@@ -176,8 +176,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_greedyswitch_Betwee
             }
         }
 
-        private func adjacentPortOf(_ edge: LEdge, _ s: PortSide) -> LPort {
-            s == .WEST ? edge.getSource()! : edge.getTarget()!
+        private func adjacentPortOf(_ edge: LEdge, _ s: PortSide) -> LPort? {
+            s == .WEST ? edge.getSource() : edge.getTarget()
         }
 
         func reset() {

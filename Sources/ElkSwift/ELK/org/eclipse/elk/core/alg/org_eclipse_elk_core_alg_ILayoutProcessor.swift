@@ -98,7 +98,8 @@ package struct AnyGraphProcessor {
                                                      isHierarchyAware: Bool = false) -> AnyGraphProcessor
     where P.G == LGraph {
         AnyGraphProcessor(isHierarchyAware: isHierarchyAware) { graph, monitor in
-            processor.process(graph as! LGraph, monitor)
+            guard let lgraph = graph as? LGraph else { return }
+            processor.process(lgraph, monitor)
         }
     }
 

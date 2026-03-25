@@ -199,7 +199,7 @@ package final class OneDimensionalCompactor {
             for n in group.cNodes {
                 n.cGroupOffset.x = 0.0
                 n.cGroupOffset.y = 0.0
-                if group.reference == nil || n.hitbox.x < group.reference!.hitbox.x {
+                if group.reference.map({ n.hitbox.x < $0.hitbox.x }) ?? true {
                     group.reference = n
                 }
             }

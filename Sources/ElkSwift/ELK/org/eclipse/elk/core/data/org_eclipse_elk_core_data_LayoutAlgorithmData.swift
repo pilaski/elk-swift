@@ -39,7 +39,10 @@ package final class LayoutAlgorithmData: ILayoutMetaData, Hashable {
         self.id = builder.id
         self.name = builder.name
         self.algorithmDescription = builder.algorithmDescription
-        self.providerPool = InstancePool(providerFactory: builder.providerFactory!)
+        guard let factory = builder.providerFactory else {
+            fatalError("LayoutAlgorithmData requires a providerFactory to be set on the Builder")
+        }
+        self.providerPool = InstancePool(providerFactory: factory)
         self.category = builder.category
         self.melkBundleName = builder.melkBundleName
         self.definingBundleId = builder.definingBundleId

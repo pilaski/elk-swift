@@ -15,8 +15,11 @@ package final class NodeMicroLayout {
     /**
      * @return a new micro layout instance for the passed graph.
      */
-    package static func forGraph(_ elkGraph: ElkNode) -> NodeMicroLayout {
-        return forGraph(ElkGraphAdapters.adapt(elkGraph)!)
+    package static func forGraph(_ elkGraph: ElkNode) -> NodeMicroLayout? {
+        guard let adapted = ElkGraphAdapters.adapt(elkGraph) else {
+            return nil
+        }
+        return forGraph(adapted)
     }
 
     /**

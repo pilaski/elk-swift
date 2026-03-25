@@ -433,7 +433,13 @@ package final class org_eclipse_elk_alg_layered_p3order_counting_CrossingsCounte
     }
 
     private func otherEndOf(_ edge: LEdge, _ fromPort: LPort) -> LPort {
-        fromPort === edge.getSource() ? edge.getTarget()! : edge.getSource()!
+        if fromPort === edge.getSource() {
+            guard let target = edge.getTarget() else { return fromPort }
+            return target
+        } else {
+            guard let source = edge.getSource() else { return fromPort }
+            return source
+        }
     }
 
     private func isLayoutUnitChanged(_ lastUnit: LNode?, _ node: LNode) -> Bool {

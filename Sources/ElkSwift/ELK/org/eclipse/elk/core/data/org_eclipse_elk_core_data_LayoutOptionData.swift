@@ -295,7 +295,7 @@ package final class LayoutOptionData: ILayoutMetaData, IProperty, Hashable {
                 checkEnumClass()
                 guard let clazz = clazz, let enumType = clazz as? AnyEnum.Type else {
                     choices = []
-                    return choices!
+                    return []
                 }
 
                 let mirror = Mirror(reflecting: enumType)
@@ -309,7 +309,7 @@ package final class LayoutOptionData: ILayoutMetaData, IProperty, Hashable {
             }
         }
 
-        return choices!
+        return choices ?? []
     }
 
     /// Returns the number of items in the enumeration class.

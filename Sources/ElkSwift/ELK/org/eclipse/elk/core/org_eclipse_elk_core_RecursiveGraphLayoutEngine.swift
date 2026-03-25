@@ -82,7 +82,7 @@ package class RecursiveGraphLayoutEngine: IGraphLayoutEngine {
                     throw ELK.Error.runtimeError("Topdown layout cannot be used together with hierarchy handling.")
                 }
 
-                let nodeCount = countNodesWithHierarchy(layoutNode)
+                _ = countNodesWithHierarchy(layoutNode)
 
                 var nodeQueue = ArrayDeque<ElkNode>(Array(layoutNode.children))
 
@@ -313,9 +313,9 @@ package class RecursiveGraphLayoutEngine: IGraphLayoutEngine {
         }
         if countAncestors {
             var parent = layoutNode.parent
-            while parent != nil {
-                count += parent!.children.count
-                parent = parent!.parent
+            while let p = parent {
+                count += p.children.count
+                parent = p.parent
             }
         }
         return count
@@ -324,12 +324,12 @@ package class RecursiveGraphLayoutEngine: IGraphLayoutEngine {
     package func evaluateHierarchyHandlingInheritance(_ layoutNode: ElkNode) {
         let hh: HierarchyHandling = layoutNode.getProperty(CoreOptions.HIERARCHY_HANDLING) ?? .inherit
         if hh == .inherit {
-            if layoutNode.parent == nil {
+            guard let parent = layoutNode.parent else {
                 layoutNode.setProperty(CoreOptions.HIERARCHY_HANDLING, HierarchyHandling.separateChildren)
-            } else {
-                let parentHandling: HierarchyHandling = layoutNode.parent!.getProperty(CoreOptions.HIERARCHY_HANDLING) ?? .separateChildren
-                layoutNode.setProperty(CoreOptions.HIERARCHY_HANDLING, parentHandling)
+                return
             }
+            let parentHandling: HierarchyHandling = parent.getProperty(CoreOptions.HIERARCHY_HANDLING) ?? .separateChildren
+            layoutNode.setProperty(CoreOptions.HIERARCHY_HANDLING, parentHandling)
         }
     }
 
@@ -341,7 +341,7 @@ package class RecursiveGraphLayoutEngine: IGraphLayoutEngine {
                 let parentData: LayoutAlgorithmData? = parentNode.getProperty(CoreOptions.RESOLVED_ALGORITHM)
                 let childData: LayoutAlgorithmData? = childNode.getProperty(CoreOptions.RESOLVED_ALGORITHM)
 
-                if parentData != nil && childData != nil && parentData!.id == childData!.id && !childNode.children.isEmpty {
+                if let pd = parentData, let cd = childData, pd.id == cd.id, !childNode.children.isEmpty {
                     count += countNodesWithHierarchy(childNode)
                 }
             }

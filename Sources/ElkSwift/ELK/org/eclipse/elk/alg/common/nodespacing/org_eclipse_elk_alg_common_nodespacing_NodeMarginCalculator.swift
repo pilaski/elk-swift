@@ -240,9 +240,9 @@ package final class NodeMarginCalculator {
             } else {
                 labelBox.x += nodeSize.x + labelSpacing
             }
-        } else {
-            let portSize = port!.getSize()
-            let portSide = port!.getSide()
+        } else if let port = port {
+            let portSize = port.getSize()
+            let portSide = port.getSide()
             switch portSide {
             case .UNDEFINED, .EAST:
                 labelBox.x += portSize.x

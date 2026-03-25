@@ -48,34 +48,38 @@ package class org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRouti
 
         // Check if the point lies somewhere at the segment's boundary
         var pointAtSegmentBoundary = false
-        if !segment.getIncomingConnectionCoordinates().isEmpty
-            && !segment.getOutgoingConnectionCoordinates().isEmpty {
+        let inCoords = segment.getIncomingConnectionCoordinates()
+        let outCoords = segment.getOutgoingConnectionCoordinates()
+        if let inFirst = inCoords.first, let outFirst = outCoords.first,
+           let inLast = inCoords.last, let outLast = outCoords.last {
 
             // Is the bend point at the start and joins another edge at the same position?
             pointAtSegmentBoundary = pointAtSegmentBoundary
-                || (abs(p - segment.getIncomingConnectionCoordinates().first!)
+                || (abs(p - inFirst)
                     < org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRoutingGenerator.TOLERANCE
-                    && abs(p - segment.getOutgoingConnectionCoordinates().first!)
+                    && abs(p - outFirst)
                         < org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRoutingGenerator.TOLERANCE)
 
             // Is the bend point at the end and joins another edge at the same position?
             pointAtSegmentBoundary = pointAtSegmentBoundary
-                || (abs(p - segment.getIncomingConnectionCoordinates().last!)
+                || (abs(p - inLast)
                     < org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRoutingGenerator.TOLERANCE
-                    && abs(p - segment.getOutgoingConnectionCoordinates().last!)
+                    && abs(p - outLast)
                         < org_eclipse_elk_alg_layered_p5edges_orthogonal_OrthogonalRoutingGenerator.TOLERANCE)
         }
 
         if pointInsideEdgeSegment || pointAtSegmentBoundary {
             // create a new junction point for the edge at the bend point's position
-            var junctionPoints: org_eclipse_elk_core_math_KVectorChain? = edge.getProperty(org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRoutingDirectionStrategy.JUNCTION_POINTS_KEY)
-            if junctionPoints == nil {
+            var junctionPoints: org_eclipse_elk_core_math_KVectorChain
+            if let existing: org_eclipse_elk_core_math_KVectorChain = edge.getProperty(org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRoutingDirectionStrategy.JUNCTION_POINTS_KEY) {
+                junctionPoints = existing
+            } else {
                 junctionPoints = org_eclipse_elk_core_math_KVectorChain()
-                edge.setProperty(org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRoutingDirectionStrategy.JUNCTION_POINTS_KEY, junctionPoints!)
+                edge.setProperty(org_eclipse_elk_alg_layered_p5edges_orthogonal_direction_BaseRoutingDirectionStrategy.JUNCTION_POINTS_KEY, junctionPoints)
             }
 
             let jpoint = org_eclipse_elk_core_math_KVector(pos)
-            junctionPoints!.add(jpoint)
+            junctionPoints.add(jpoint)
             createdJunctionPoints.insert(jpoint)
         }
     }

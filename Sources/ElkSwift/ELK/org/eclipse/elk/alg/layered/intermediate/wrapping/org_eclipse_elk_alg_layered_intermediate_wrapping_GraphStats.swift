@@ -110,40 +110,40 @@ package class org_eclipse_elk_alg_layered_intermediate_wrapping_GraphStats {
     // MARK: - Widths
 
     package func getMaxWidth() -> Double {
-        if maxWidth == nil {
-            maxWidth = determineWidth { a, b in max(a, b) }
-        }
-        return maxWidth!
+        if let cached = maxWidth { return cached }
+        let computed = determineWidth { a, b in max(a, b) }
+        maxWidth = computed
+        return computed
     }
 
     package func getSumWidth() -> Double {
-        if sumWidth == nil {
-            sumWidth = determineWidth { a, b in a + b }
-        }
-        return sumWidth!
+        if let cached = sumWidth { return cached }
+        let computed = determineWidth { a, b in a + b }
+        sumWidth = computed
+        return computed
     }
 
     package func getWidths() -> [Double] {
-        if _widths == nil {
-            initWidthsAndHeights()
-        }
-        return _widths!
+        if let cached = _widths { return cached }
+        initWidthsAndHeights()
+        let computed = _widths ?? []
+        return computed
     }
 
     // MARK: - Heights
 
     package func getMaxHeight() -> Double {
-        if maxHeight == nil {
-            maxHeight = determineHeight { a, b in max(a, b) }
-        }
-        return maxHeight!
+        if let cached = maxHeight { return cached }
+        let computed = determineHeight { a, b in max(a, b) }
+        maxHeight = computed
+        return computed
     }
 
     package func getHeights() -> [Double] {
-        if _heights == nil {
-            initWidthsAndHeights()
-        }
-        return _heights!
+        if let cached = _heights { return cached }
+        initWidthsAndHeights()
+        let computed = _heights ?? []
+        return computed
     }
 
     // MARK: - Cutting allowed
@@ -153,14 +153,16 @@ package class org_eclipse_elk_alg_layered_intermediate_wrapping_GraphStats {
         if cutsAllowed == nil {
             initCutAllowed()
         }
-        return cutsAllowed![layerIndex]
+        let cached = cutsAllowed ?? []
+        return cached[layerIndex]
     }
 
     package func getCutsAllowed() -> [Bool] {
         if cutsAllowed == nil {
             initCutAllowed()
         }
-        return cutsAllowed!
+        let cached = cutsAllowed ?? []
+        return cached
     }
 
     // MARK: - Private helpers

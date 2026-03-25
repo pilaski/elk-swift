@@ -38,19 +38,20 @@ package final class CommentPreprocessor: ILayoutProcessor {
                     edgeCount += port.degree
                     if port.incomingEdges.count == 1 {
                         edge = port.incomingEdges[0]
-                        oppositePort = edge!.source
+                        oppositePort = edge?.source
                     }
                     if port.outgoingEdges.count == 1 {
                         edge = port.outgoingEdges[0]
-                        oppositePort = edge!.target
+                        oppositePort = edge?.target
                     }
                 }
 
-                if edgeCount == 1 && oppositePort!.degree == 1
-                    && !(oppositePort!.node?.getProperty(LayeredOptions.COMMENT_BOX) as? Bool ?? false),
-                    let realNode = oppositePort?.node {
+                if let edge = edge, let oppositePort = oppositePort,
+                   edgeCount == 1 && oppositePort.degree == 1
+                    && !(oppositePort.node?.getProperty(LayeredOptions.COMMENT_BOX) as? Bool ?? false),
+                    let realNode = oppositePort.node {
                     // found a comment that has exactly one connection
-                    processBox(box: node, edge: edge!, oppositePort: oppositePort!, realNode: realNode)
+                    processBox(box: node, edge: edge, oppositePort: oppositePort, realNode: realNode)
                     nodesToRemove.append(index)
                 } else {
                     // reverse edges that are oddly connected

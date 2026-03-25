@@ -61,7 +61,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
             for node in layer.nodes {
                 if node.type == .label {
                     let info = LabelDummyInfo(node, defaultPlacementStrategy)
-                    infos[info.placementStrategy]!.append(info)
+                    infos[info.placementStrategy, default: []].append(info)
                 }
             }
         }
@@ -129,7 +129,7 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
     }
 
     private func computeLayerWidthSums(_ info: LabelDummyInfo) -> [Double] {
-        let lgraph = info.labelDummy.getGraph()!
+        guard let lgraph = info.labelDummy.getGraph() else { return [] }
         let edgeNodeSpacing = (lgraph.getProperty(LayeredOptions.SPACING_EDGE_NODE_BETWEEN_LAYERS) as? Double ?? 0.0) * 2
         let nodeNodeSpacing = lgraph.getProperty(LayeredOptions.SPACING_NODE_NODE_BETWEEN_LAYERS) as? Double ?? 0.0
         let minSpaceBetweenLayers = max(edgeNodeSpacing, nodeNodeSpacing)
@@ -139,17 +139,21 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
         var idx = 0
 
         for leftDummy in info.leftLongEdgeDummies {
-            currentWidthSum += layerWidths[leftDummy.layer!.id] + minSpaceBetweenLayers
+            guard let leftDummyLayer = leftDummy.layer else { continue }
+            currentWidthSum += layerWidths[leftDummyLayer.id] + minSpaceBetweenLayers
             sums[idx] = currentWidthSum
             idx += 1
         }
 
-        currentWidthSum += layerWidths[info.labelDummy.layer!.id] + minSpaceBetweenLayers
-        sums[idx] = currentWidthSum
-        idx += 1
+        if let labelDummyLayer = info.labelDummy.layer {
+            currentWidthSum += layerWidths[labelDummyLayer.id] + minSpaceBetweenLayers
+            sums[idx] = currentWidthSum
+            idx += 1
+        }
 
         for rightDummy in info.rightLongEdgeDummies {
-            currentWidthSum += layerWidths[rightDummy.layer!.id] + minSpaceBetweenLayers
+            guard let rightDummyLayer = rightDummy.layer else { continue }
+            currentWidthSum += layerWidths[rightDummyLayer.id] + minSpaceBetweenLayers
             sums[idx] = currentWidthSum
             idx += 1
         }
@@ -222,7 +226,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
 
     private func assignToWiderLayer(_ info: LabelDummyInfo) -> Bool {
         let dummyWidth = info.labelDummy.size.x
-        let validLayers = Array(info.labelDummy.getGraph()!.layers[info.leftmostLayerId...(info.rightmostLayerId)])
+        guard let graph = info.labelDummy.getGraph() else { return false }
+        let validLayers = Array(graph.layers[info.leftmostLayerId...(info.rightmostLayerId)])
         for layer in validLayers {
             if layer.size.x >= dummyWidth {
                 assignLayer(info, layer.id)
@@ -270,7 +275,8 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
             swapNodes(info.labelDummy, info.ithDummyNode(targetLayerIndex - info.leftmostLayerId))
         }
 
-        let newLayerId = info.labelDummy.layer!.id
+        guard let newLayer = info.labelDummy.layer else { return }
+        let newLayerId = newLayer.id
         layerWidths[newLayerId] = max(layerWidths[newLayerId], info.labelDummy.size.x)
 
         if let representedLabels = info.labelDummy.getProperty(InternalProperties.REPRESENTED_LABELS) as? [LLabel] {
@@ -282,16 +288,16 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
     }
 
     private func swapNodes(_ labelDummy: LNode, _ longEdgeDummy: LNode) {
-        let layer1 = labelDummy.layer!
-        let layer2 = longEdgeDummy.layer!
+        guard let layer1 = labelDummy.layer,
+              let layer2 = longEdgeDummy.layer else { return }
 
         let dummy1LayerPosition = layer1.nodes.firstIndex(where: { $0 === labelDummy }) ?? 0
         let dummy2LayerPosition = layer2.nodes.firstIndex(where: { $0 === longEdgeDummy }) ?? 0
 
-        let inputPort1 = labelDummy.getPorts(.INPUT).first!
-        let outputPort1 = labelDummy.getPorts(.OUTPUT).first!
-        let inputPort2 = longEdgeDummy.getPorts(.INPUT).first!
-        let outputPort2 = longEdgeDummy.getPorts(.OUTPUT).first!
+        guard let inputPort1 = labelDummy.getPorts(.INPUT).first,
+              let outputPort1 = labelDummy.getPorts(.OUTPUT).first,
+              let inputPort2 = longEdgeDummy.getPorts(.INPUT).first,
+              let outputPort2 = longEdgeDummy.getPorts(.OUTPUT).first else { return }
 
         let incomingEdges1 = LGraphUtil.toEdgeArray(inputPort1.incomingEdges)
         let outgoingEdges1 = LGraphUtil.toEdgeArray(outputPort1.outgoingEdges)
@@ -346,8 +352,9 @@ package final class org_eclipse_elk_alg_layered_intermediate_LabelDummySwitcher 
             gatherLeftLongEdgeDummies()
             gatherRightLongEdgeDummies()
 
-            leftmostLayerId = leftLongEdgeDummies.isEmpty ? labelDummy.layer!.id : leftLongEdgeDummies[0].layer!.id
-            rightmostLayerId = rightLongEdgeDummies.isEmpty ? labelDummy.layer!.id : rightLongEdgeDummies.last!.layer!.id
+            let labelDummyLayerId = labelDummy.layer?.id ?? 0
+            leftmostLayerId = leftLongEdgeDummies.isEmpty ? labelDummyLayerId : (leftLongEdgeDummies[0].layer?.id ?? labelDummyLayerId)
+            rightmostLayerId = rightLongEdgeDummies.isEmpty ? labelDummyLayerId : (rightLongEdgeDummies.last?.layer?.id ?? labelDummyLayerId)
 
             if let representedLabels = labelDummy.getProperty(InternalProperties.REPRESENTED_LABELS) as? [LLabel] {
                 for label in representedLabels {

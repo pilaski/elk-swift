@@ -36,7 +36,7 @@ package final class VerticalPortPlacementSizeCalculator {
             bottommostPortBorder = max(bottommostPortBorder, portY + portHeight)
         }
 
-        let cell = nodeContext.insidePortLabelCells[portSide]!
+        guard let cell = nodeContext.insidePortLabelCells[portSide] else { return }
         cell.padding.top = 0
         cell.minimumContentAreaSize.y = bottommostPortBorder
     }
@@ -46,7 +46,7 @@ package final class VerticalPortPlacementSizeCalculator {
 
     package static func calculateVerticalNodeSizeRequiredByFixedRatioPorts(_ nodeContext: NodeContext, _ portSide: PortSide) {
 
-        let cell = nodeContext.insidePortLabelCells[portSide]!
+        guard let cell = nodeContext.insidePortLabelCells[portSide] else { return }
 
         guard let portContexts = nodeContext.portContexts[portSide], !portContexts.isEmpty else {
             cell.padding.top = 0
@@ -69,7 +69,16 @@ package final class VerticalPortPlacementSizeCalculator {
             let currentPortRatio: Double = currentPortContext.port.getProperty(PortPlacementCalculator.PORT_RATIO_OR_POSITION) ?? 0.0
             let currentPortHeight = currentPortContext.port.getSize().y
 
-            if previousPortContext == nil {
+            if let prev = previousPortContext {
+                let requiredSpace = previousPortHeight + prev.portMargin.bottom
+                        + nodeContext.portPortSpacing + currentPortContext.portMargin.top
+                minHeight = max(
+                        minHeight,
+                        HorizontalPortPlacementSizeCalculator.minSizeRequiredToRespectSpacing(
+                                requiredSpace,
+                                previousPortRatio,
+                                currentPortRatio))
+            } else {
                 let surroundingPortMargins = nodeContext.surroundingPortMargins
                 if surroundingPortMargins.top > 0 {
                     let requiredSpace = surroundingPortMargins.top + currentPortContext.portMargin.top
@@ -80,15 +89,6 @@ package final class VerticalPortPlacementSizeCalculator {
                             0,
                             currentPortRatio))
                 }
-            } else {
-                let requiredSpace = previousPortHeight + previousPortContext!.portMargin.bottom
-                        + nodeContext.portPortSpacing + currentPortContext.portMargin.top
-                minHeight = max(
-                        minHeight,
-                        HorizontalPortPlacementSizeCalculator.minSizeRequiredToRespectSpacing(
-                                requiredSpace,
-                                previousPortRatio,
-                                currentPortRatio))
             }
 
             previousPortContext = currentPortContext
@@ -101,7 +101,7 @@ package final class VerticalPortPlacementSizeCalculator {
             var requiredSpace = previousPortHeight + surroundingPortMargins.bottom
 
             if portLabelsInside {
-                requiredSpace += previousPortContext!.portMargin.bottom
+                requiredSpace += previousPortContext?.portMargin.bottom ?? 0
             }
 
             minHeight = max(
@@ -121,7 +121,7 @@ package final class VerticalPortPlacementSizeCalculator {
 
     package static func calculateVerticalNodeSizeRequiredByFreePorts(_ nodeContext: NodeContext, _ portSide: PortSide) {
 
-        let cell = nodeContext.insidePortLabelCells[portSide]!
+        guard let cell = nodeContext.insidePortLabelCells[portSide] else { return }
 
         guard let portContexts = nodeContext.portContexts[portSide], !portContexts.isEmpty else {
             cell.padding.top = 0
@@ -195,21 +195,19 @@ package final class VerticalPortPlacementSizeCalculator {
         guard let portContexts = nodeContext.portContexts[portSide] else { return }
 
         for portContext in portContexts {
-            let labelHeight = portContext.portLabelCell != nil
-                    ? portContext.portLabelCell!.getMinimumHeight()
-                    : 0
+            let labelHeight = portContext.portLabelCell?.getMinimumHeight() ?? 0
 
             if labelHeight > 0 {
                 if portContext.labelsNextToPort {
                     let portHeight = portContext.port.getSize().y
                     if labelHeight > portHeight {
-                        if nodeContext.portLabelsTreatAsGroup || portContext.portLabelCell!.labels.count == 1 {
+                        if nodeContext.portLabelsTreatAsGroup || (portContext.portLabelCell?.labels.count ?? 0) == 1 {
                             let overhang = (labelHeight - portHeight) / 2
                             portContext.portMargin.top = overhang
                             portContext.portMargin.bottom = overhang
 
                         } else {
-                            let firstLabelHeight = portContext.portLabelCell!.labels[0].getSize().y
+                            let firstLabelHeight = portContext.portLabelCell?.labels.first?.getSize().y ?? 0
                             let firstLabelOverhang = (firstLabelHeight - portHeight) / 2
 
                             portContext.portMargin.top = max(0, firstLabelOverhang)

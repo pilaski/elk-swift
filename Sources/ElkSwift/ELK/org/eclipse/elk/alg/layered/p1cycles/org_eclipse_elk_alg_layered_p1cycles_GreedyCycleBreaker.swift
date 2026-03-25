@@ -154,10 +154,14 @@ package class org_eclipse_elk_alg_layered_p1cycles_GreedyCycleBreaker {
     package func chooseNodeWithMaxOutflow(
         _ nodes: [org_eclipse_elk_alg_layered_graph_LNode]
     ) -> org_eclipse_elk_alg_layered_graph_LNode {
-        precondition(!nodes.isEmpty, "nodes must not be empty")
+        guard let first = nodes.first else {
+            assertionFailure("chooseNodeWithMaxOutflow called with empty nodes")
+            return LNode(LGraph())
+        }
         if let rng = layeredGraph?.getProperty(org_eclipse_elk_alg_layered_options_InternalProperties.RANDOM) as? Random {
             return nodes[rng.nextInt(nodes.count)]
         }
+        if nodes.count == 1 { return first }
         return nodes[Int.random(in: 0..<nodes.count)]
     }
 
