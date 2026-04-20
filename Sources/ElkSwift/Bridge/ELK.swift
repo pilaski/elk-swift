@@ -63,7 +63,7 @@ public final class ELK {
             ])
             .create()
 
-        service.layoutAlgorithmMap[layeredData.id] = layeredData
+        service.registerAlgorithm(layeredData)
     }
 
     /// Layout a graph specified as a JSON-compatible dictionary.
