@@ -174,6 +174,150 @@ final class ConcurrentLayoutTests: XCTestCase {
         XCTAssertEqual(instances.count, 10)
     }
 
+    // MARK: - High-pressure stress tests
+    //
+    // The original tests used DispatchQueue.async with only 10 iterations, which
+    // rarely reproduced the LayoutMetaDataService.algorithmSuffixMap race that
+    // crashed production. These tests raise the pressure by
+    //   (a) using concurrentPerform for true parallelism scaled to cpu count,
+    //   (b) driving hundreds of iterations per run,
+    //   (c) varying the graph corpus so many distinct suffixes get looked up
+    //       (each one opens its own first-write cache-miss window).
+    //
+    // A full cold-start-per-batch would be a stronger net, but it requires
+    // pairing LayoutMetaDataService.unload() with a reset of
+    // ELK._algorithmsRegistered — a source-side change. Tracked as a follow-up;
+    // the pressure tests below are best-effort within the test target alone.
+
+    private static func makeGraphCorpus() -> [[String: Any]] {
+        // Each graph sets a different elk.algorithm / edgeRouting / direction
+        // combination so the resolver touches a range of suffixes.
+        var corpus: [[String: Any]] = []
+        let directions = ["RIGHT", "DOWN", "LEFT", "UP"]
+        let routings = ["ORTHOGONAL", "POLYLINE"]
+        for (i, direction) in directions.enumerated() {
+            for routing in routings {
+                corpus.append([
+                    "id": "root_\(i)_\(routing)",
+                    "layoutOptions": [
+                        "elk.algorithm": "layered",
+                        "elk.direction": direction,
+                        "elk.edgeRouting": routing,
+                        "elk.spacing.nodeNode": "20"
+                    ],
+                    "children": [
+                        ["id": "A", "width": 50, "height": 30],
+                        ["id": "B", "width": 50, "height": 30],
+                        ["id": "C", "width": 50, "height": 30],
+                        ["id": "D", "width": 50, "height": 30]
+                    ],
+                    "edges": [
+                        ["id": "e1", "sources": ["A"], "targets": ["B"]],
+                        ["id": "e2", "sources": ["A"], "targets": ["C"]],
+                        ["id": "e3", "sources": ["B"], "targets": ["D"]],
+                        ["id": "e4", "sources": ["C"], "targets": ["D"]]
+                    ]
+                ])
+            }
+        }
+        return corpus
+    }
+
+    /// Drives concurrentPerform hard across a diverse corpus. If concurrent
+    /// access to the metadata singleton is unsafe, this will either crash
+    /// (Dictionary race → EXC_BAD_ACCESS) or report errors from corrupted state.
+    func testHighConcurrencyStress() throws {
+        let corpus = Self.makeGraphCorpus()
+        let workers = max(8, ProcessInfo.processInfo.activeProcessorCount * 2)
+        let batches = 40
+
+        let errorsLock = NSLock()
+        var errors: [Swift.Error] = []
+
+        for batch in 0..<batches {
+            DispatchQueue.concurrentPerform(iterations: workers) { idx in
+                do {
+                    let elk = ELK()
+                    let graph = corpus[(batch &+ idx) % corpus.count]
+                    _ = try elk.layout(graph: graph)
+                } catch {
+                    errorsLock.lock()
+                    errors.append(error)
+                    errorsLock.unlock()
+                }
+            }
+        }
+
+        XCTAssertTrue(
+            errors.isEmpty,
+            "Stress run produced \(errors.count) errors: \(errors.prefix(3))"
+        )
+    }
+
+    /// Large single-phase burst: 500 concurrent layouts on the same process.
+    func testWarmCacheBurst() throws {
+        let corpus = Self.makeGraphCorpus()
+        let iterations = 500
+
+        let errorsLock = NSLock()
+        var errors: [Swift.Error] = []
+
+        DispatchQueue.concurrentPerform(iterations: iterations) { idx in
+            do {
+                let elk = ELK()
+                let graph = corpus[idx % corpus.count]
+                _ = try elk.layout(graph: graph)
+            } catch {
+                errorsLock.lock()
+                errors.append(error)
+                errorsLock.unlock()
+            }
+        }
+
+        XCTAssertTrue(
+            errors.isEmpty,
+            "Warm-cache burst produced \(errors.count) errors: \(errors.prefix(3))"
+        )
+    }
+
+    /// Determinism check: N concurrent renders of the same graph must each
+    /// equal the serial baseline. Guards against a passing-but-silently-wrong
+    /// outcome where a reader sees torn state that doesn't crash.
+    func testConcurrentDeterminism() throws {
+        let graph = try Self.parseJson(Self.flow18Json)
+
+        let baseline = try JSONSerialization.data(
+            withJSONObject: try ELK().layout(graph: graph),
+            options: .sortedKeys
+        )
+
+        let workers = max(8, ProcessInfo.processInfo.activeProcessorCount * 2)
+        let resultsLock = NSLock()
+        var results: [Data] = []
+        var errors: [Swift.Error] = []
+
+        for _ in 0..<10 {
+            DispatchQueue.concurrentPerform(iterations: workers) { _ in
+                do {
+                    let out = try ELK().layout(graph: graph)
+                    let data = try JSONSerialization.data(withJSONObject: out, options: .sortedKeys)
+                    resultsLock.lock()
+                    results.append(data)
+                    resultsLock.unlock()
+                } catch {
+                    resultsLock.lock()
+                    errors.append(error)
+                    resultsLock.unlock()
+                }
+            }
+        }
+
+        XCTAssertTrue(errors.isEmpty, "Errors during determinism stress: \(errors.prefix(3))")
+        for (i, data) in results.enumerated() {
+            XCTAssertEqual(data, baseline, "Concurrent run \(i) diverged from serial baseline")
+        }
+    }
+
     func testLayoutTimeout() throws {
         let graph = try Self.parseJson(Self.flow18Json)
         let elk = ELK()
