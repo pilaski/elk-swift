@@ -16,12 +16,16 @@ package enum org_eclipse_elk_alg_layered_p1cycles_ModelOrderPropertyScaffolding 
         static let cbNumModelOrderGroups = "INTERNAL_CB_NUM_MODEL_ORDER_GROUPS"
     }
 
-    package static var layerConstraintByNode: [ObjectIdentifier: org_eclipse_elk_alg_layered_options_LayerConstraint] = [:]
-    package static var modelOrderByNode: [ObjectIdentifier: Int] = [:]
-    package static var cycleBreakingGroupIdByNode: [ObjectIdentifier: Int] = [:]
-    package static var groupOrderStrategyByGraph: [ObjectIdentifier: org_eclipse_elk_alg_layered_options_GroupOrderStrategy] = [:]
-    package static var maxModelOrderNodesByGraph: [ObjectIdentifier: Int] = [:]
-    package static var cbNumModelOrderGroupsByGraph: [ObjectIdentifier: Int] = [:]
+    // These scaffolding maps have no writers in the current port; kept immutable
+    // so a future regression cannot reintroduce a process-wide mutable singleton
+    // that would race under concurrent renders. If real writers are ever needed,
+    // move the state onto the owning LGraph/LNode instead of a static map.
+    package static let layerConstraintByNode: [ObjectIdentifier: org_eclipse_elk_alg_layered_options_LayerConstraint] = [:]
+    package static let modelOrderByNode: [ObjectIdentifier: Int] = [:]
+    package static let cycleBreakingGroupIdByNode: [ObjectIdentifier: Int] = [:]
+    package static let groupOrderStrategyByGraph: [ObjectIdentifier: org_eclipse_elk_alg_layered_options_GroupOrderStrategy] = [:]
+    package static let maxModelOrderNodesByGraph: [ObjectIdentifier: Int] = [:]
+    package static let cbNumModelOrderGroupsByGraph: [ObjectIdentifier: Int] = [:]
 
     package static func layerConstraint(
         for node: org_eclipse_elk_alg_layered_graph_LNode
