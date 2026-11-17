@@ -7,7 +7,9 @@
 // SPDX-License-Identifier: EPL-2.0
 
 import Foundation
+#if canImport(os)
 import os
+#endif
 
 // MARK: - Supporting Types
 

@@ -2,7 +2,9 @@
 // Pure Swift port of Eclipse Layout Kernel (Java).
 
 import Foundation
+#if canImport(os)
 import os
+#endif
 
 public final class ELK {
 
